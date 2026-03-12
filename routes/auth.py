@@ -3,8 +3,8 @@ from __future__ import annotations
 import bcrypt
 from flask import Blueprint, request
 
-from back.db import query_one
-from back.utils import err, make_token, ok, parse_auth, require_admin
+from db import query_one
+from utils import err, make_token, ok, parse_auth, require_admin
 
 
 auth_bp = Blueprint("auth", __name__)

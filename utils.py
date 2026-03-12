@@ -7,7 +7,7 @@ from typing import Any, Callable, Dict
 import jwt
 from flask import jsonify, request
 
-from back.config import Config
+from config import Config
 
 
 def make_token(user: dict) -> str:

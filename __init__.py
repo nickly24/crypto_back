@@ -3,8 +3,8 @@ from __future__ import annotations
 from flask import Flask
 from flask_cors import CORS
 
-from back.config import Config
-from back.routes.auth import auth_bp
+from config import Config
+from routes.auth import auth_bp
 
 
 def create_app() -> Flask:
