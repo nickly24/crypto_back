@@ -64,8 +64,8 @@ app.config["SECRET_KEY"] = Config.SECRET_KEY
 
 CORS(
     app,
-    resources={r"/api/*": {"origins": Config.FRONTEND_ORIGIN}},
-    supports_credentials=True,
+    resources={r"/api/*": {"origins": "*"}},
+    supports_credentials=False,
 )
 
 
