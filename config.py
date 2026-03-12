@@ -30,6 +30,9 @@ class Config:
     JWT_ALG: str = "HS256"
     JWT_TTL_SECONDS: int = int(os.getenv("JWT_TTL_SECONDS", "86400"))  # 1 день
 
+    # Server
+    PORT: int = int(os.getenv("PORT", "8000"))
+
     # Bot Manager HTTP API
     MANAGER_URL: str = os.getenv("MANAGER_URL", "http://127.0.0.1:6800")
     MANAGER_API_KEY: str = os.getenv("MANAGER_API_KEY", "your-secret-key-here")

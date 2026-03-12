@@ -312,6 +312,7 @@ def bot_close_position():
             interval=1.0,
         )
         closed = row and row.get("position_open") == 0
+        # Не удаляем chart_spread_points при закрытии — история спреда остаётся
         trade = query_one(
             "SELECT id, pnl_pct, close_reason FROM trades WHERE user_id = %s ORDER BY id DESC LIMIT 1",
             (user_id,),
@@ -344,6 +345,176 @@ def bot_logs():
         return _err(f"Manager unavailable: {e}", 503)
 
     return jsonify(resp.json()), resp.status_code
+
+
+# ---------------------------------------------------------------------------
+# Instruments (OKX public API — ключ не нужен)
+# ---------------------------------------------------------------------------
+
+
+@app.get("/api/instruments")
+def get_instruments():
+    user, error = _require_auth_user_or_401()
+    if error:
+        return error
+
+    try:
+        resp = requests.get(
+            "https://www.okx.com/api/v5/public/instruments",
+            params={"instType": "SWAP"},
+            timeout=10,
+        )
+        data = resp.json()
+    except Exception as e:
+        return _err(f"OKX API error: {e}", 502)
+
+    if data.get("code") != "0":
+        return _err(data.get("msg", "OKX error"), 502)
+
+    instruments = [
+        inst["instId"]
+        for inst in data.get("data", [])
+        if inst.get("settleCcy") == "USDT"
+    ]
+    return _ok({"instruments": instruments})
+
+
+# ---------------------------------------------------------------------------
+# Chart data (spread, instrument prices)
+# ---------------------------------------------------------------------------
+
+
+@app.get("/api/chart/spread")
+def get_chart_spread():
+    user, error = _require_auth_user_or_401()
+    if error:
+        return error
+    user_id = int(user["sub"])
+    minutes_arg = request.args.get("minutes", type=int)
+    if minutes_arg is not None:
+        minutes = min(1440, max(1, minutes_arg))  # 1..1440 min (24h)
+        interval_sql = "DATE_SUB(NOW(), INTERVAL %s MINUTE)"
+        interval_val = minutes
+    else:
+        hours = min(24, max(1, int(request.args.get("hours", 10))))
+        interval_sql = "DATE_SUB(NOW(), INTERVAL %s HOUR)"
+        interval_val = hours
+
+    rows = query_all(
+        f"""
+        SELECT ts, spread_pct, r_basket1_pct, r_basket2_pct
+        FROM chart_spread_points
+        WHERE user_id = %s AND ts >= {interval_sql}
+        ORDER BY ts ASC
+        """,
+        (user_id, interval_val),
+    )
+    points = [
+        {
+            "ts": r["ts"].isoformat() if hasattr(r["ts"], "isoformat") else str(r["ts"]),
+            "spread_pct": float(r["spread_pct"]),
+            "r_basket1_pct": float(r["r_basket1_pct"]),
+            "r_basket2_pct": float(r["r_basket2_pct"]),
+        }
+        for r in rows
+    ]
+    return _ok({"points": points})
+
+
+@app.get("/api/chart/instruments")
+def get_chart_instruments():
+    user, error = _require_auth_user_or_401()
+    if error:
+        return error
+    user_id = int(user["sub"])
+    hours = min(24, max(1, int(request.args.get("hours", 10))))
+
+    cfg = query_one("SELECT id FROM bot_configs WHERE user_id = %s", (user_id,))
+    if not cfg:
+        return _ok({"points": []})
+
+    inst_rows = query_all(
+        """
+        SELECT DISTINCT symbol_basket1 AS inst_id FROM basket_pairs WHERE bot_config_id = %s
+        UNION
+        SELECT DISTINCT symbol_basket2 FROM basket_pairs WHERE bot_config_id = %s
+        """,
+        (cfg["id"], cfg["id"]),
+    )
+    inst_ids = [r["inst_id"] for r in inst_rows if r["inst_id"]]
+
+    rows = query_all(
+        """
+        SELECT ts, inst_id, price
+        FROM chart_instrument_points
+        WHERE user_id = %s AND ts >= DATE_SUB(NOW(), INTERVAL %s HOUR)
+        ORDER BY ts ASC
+        """,
+        (user_id, hours),
+    )
+    points = [
+        {
+            "ts": r["ts"].isoformat() if hasattr(r["ts"], "isoformat") else str(r["ts"]),
+            "inst_id": r["inst_id"],
+            "price": float(r["price"]),
+        }
+        for r in rows
+    ]
+    return _ok({"points": points, "instruments": inst_ids})
+
+
+@app.post("/api/chart/spread/reset")
+def reset_chart_spread():
+    user, error = _require_auth_user_or_401()
+    if error:
+        return error
+    user_id = int(user["sub"])
+    execute("DELETE FROM chart_spread_points WHERE user_id = %s", (user_id,))
+    return _ok({"ok": True})
+
+
+@app.post("/api/chart/instruments/reset")
+def reset_chart_instruments():
+    user, error = _require_auth_user_or_401()
+    if error:
+        return error
+    user_id = int(user["sub"])
+    execute("DELETE FROM chart_instrument_points WHERE user_id = %s", (user_id,))
+    return _ok({"ok": True})
+
+
+@app.get("/api/chart/candles")
+def get_chart_candles():
+    user, error = _require_auth_user_or_401()
+    if error:
+        return error
+    inst_id = request.args.get("instId", "").strip()
+    bar = request.args.get("bar", "1m")
+    limit = min(300, max(60, int(request.args.get("limit", 300))))
+    if not inst_id:
+        return _err("instId required", 400)
+    try:
+        resp = requests.get(
+            "https://www.okx.com/api/v5/market/candles",
+            params={"instId": inst_id, "bar": bar, "limit": str(limit)},
+            timeout=10,
+        )
+        data = resp.json()
+    except Exception as e:
+        return _err(f"OKX API error: {e}", 502)
+    if data.get("code") != "0":
+        return _err(data.get("msg", "OKX error"), 502)
+    candles = []
+    for row in data.get("data", []):
+        candles.append({
+            "ts": int(row[0]),
+            "o": float(row[1]),
+            "h": float(row[2]),
+            "l": float(row[3]),
+            "c": float(row[4]),
+            "v": float(row[5]),
+        })
+    return _ok({"candles": candles})
 
 
 # ---------------------------------------------------------------------------
@@ -566,6 +737,7 @@ def update_bot_config():
             """,
             (cfg["id"], idx, b.get("basket1"), b.get("basket2")),
         )
+    execute("DELETE FROM chart_instrument_points WHERE user_id = %s", (user_id,))
 
     return _ok({"ok": True})
 
@@ -725,4 +897,4 @@ def analytics_trades():
 
 
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=8000, debug=True)
+    app.run(host="127.0.0.1", port=Config.PORT, debug=True)
