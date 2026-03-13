@@ -218,7 +218,10 @@ def bot_status():
     except Exception as e:
         return _err(f"Manager unavailable: {e}", 503)
 
-    return jsonify(resp.json()), resp.status_code
+    response = jsonify(resp.json()), resp.status_code
+    response[0].headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
+    response[0].headers["Pragma"] = "no-cache"
+    return response
 
 
 @app.post("/api/bot/start")
