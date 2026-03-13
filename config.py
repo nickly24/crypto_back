@@ -37,3 +37,6 @@ class Config:
     MANAGER_URL: str = os.getenv("MANAGER_URL", "http://127.0.0.1:6800")
     MANAGER_API_KEY: str = os.getenv("MANAGER_API_KEY", "your-secret-key-here")
 
+    # Encryption (Fernet) — тот же ключ, что и в bot_manager (общая БД user_settings)
+    ENCRYPTION_KEY: str = os.getenv("ENCRYPTION_KEY", "dvKM1FbZzPZ--aLlGtqckBYuHVgwNaDGiILZNeP_lKY=")
+

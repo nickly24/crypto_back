@@ -5,4 +5,5 @@ python-dotenv
 bcrypt
 PyJWT
 requests
+cryptography
 

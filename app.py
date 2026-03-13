@@ -308,8 +308,8 @@ def bot_close_position():
             "SELECT position_open FROM bot_state WHERE user_id = %s",
             (user_id,),
             lambda r: r.get("position_open") == 0,
-            timeout=20.0,
-            interval=1.0,
+            timeout=25.0,
+            interval=0.5,
         )
         closed = row and row.get("position_open") == 0
         # Не удаляем chart_spread_points при закрытии — история спреда остаётся
@@ -575,7 +575,7 @@ def save_okx_keys():
         (user_id,),
     ) or {}
 
-    from bot_manager.crypto.encryption import encrypt  # type: ignore[import]
+    from crypto.encryption import encrypt
 
     enc_api = current.get("okx_api_key")
     enc_secret = current.get("okx_secret_key")
@@ -897,4 +897,5 @@ def analytics_trades():
 
 
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=Config.PORT, debug=True)
+    # threaded=True — чтобы длинные запросы (close/start с _poll_db) не блокировали status и др.
+    app.run(host="127.0.0.1", port=Config.PORT, debug=True, threaded=True)
