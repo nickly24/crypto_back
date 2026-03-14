@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime as dt
+import json
 import time
 from typing import Any, Dict
 
@@ -894,6 +895,65 @@ def analytics_trades():
             "long_basket": r.get("long_basket"),
             "short_basket": r.get("short_basket"),
             "reason": r.get("close_reason"),
+        }
+
+    return _ok({"trades": [_serialize(r) for r in rows]})
+
+
+@app.get("/api/analytics/trades/detailed")
+def analytics_trades_detailed():
+    """Сделки с pairs_detail (корзины/позиции) для детализации в аналитике."""
+    user, error = _require_auth_user_or_401()
+    if error:
+        return error
+    user_id = int(user["sub"])
+
+    limit = int(request.args.get("limit", 50))
+    rows = query_all(
+        """
+        SELECT
+          id,
+          opened_at,
+          closed_at,
+          duration_seconds,
+          entry_spread_pct,
+          exit_spread_pct,
+          pnl_pct,
+          pnl_usdt,
+          total_volume_usdt,
+          long_basket,
+          short_basket,
+          close_reason,
+          pairs_detail
+        FROM trades
+        WHERE user_id = %s
+        ORDER BY id DESC
+        LIMIT %s
+        """,
+        (user_id, limit),
+    )
+
+    def _serialize(r: dict) -> dict:
+        pairs_detail = r.get("pairs_detail")
+        if isinstance(pairs_detail, str) and pairs_detail:
+            try:
+                pairs_detail = json.loads(pairs_detail)
+            except (ValueError, TypeError):
+                pairs_detail = None
+        return {
+            "id": r["id"],
+            "opened_at": r["opened_at"].isoformat() if r.get("opened_at") else None,
+            "closed_at": r["closed_at"].isoformat() if r.get("closed_at") else None,
+            "duration_sec": r.get("duration_seconds"),
+            "entry_spread_pct": float(r.get("entry_spread_pct", 0)),
+            "exit_spread_pct": float(r.get("exit_spread_pct", 0)),
+            "pnl_pct": float(r.get("pnl_pct", 0)),
+            "pnl_usdt": float(r.get("pnl_usdt", 0)),
+            "total_volume_usdt": float(r.get("total_volume_usdt", 0)),
+            "long_basket": r.get("long_basket"),
+            "short_basket": r.get("short_basket"),
+            "reason": r.get("close_reason"),
+            "pairs_detail": pairs_detail or {},
         }
 
     return _ok({"trades": [_serialize(r) for r in rows]})
