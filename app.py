@@ -351,32 +351,17 @@ def create_subscription_payment():
     })
 
 
-@app.post("/api/webhooks/yookassa")
-def webhook_yookassa():
-    """Входящие уведомления ЮKassa. При payment.succeeded продлеваем подписку."""
-    raw = request.get_data(as_text=True)
-    try:
-        payload = json.loads(raw) if raw else {}
-    except json.JSONDecodeError:
-        return "", 400
-    event = payload.get("event")  # payment.succeeded / payment.canceled / ...
-    obj = payload.get("object", {})
-    if event != "payment.succeeded":
-        return "", 200
-    yookassa_id = obj.get("id")
-    status = obj.get("status")
-    if not yookassa_id or status != "succeeded":
-        return "", 200
-
+def _apply_payment_succeeded(yookassa_id: str) -> bool:
+    """Продлевает подписку по успешному платежу ЮKassa. Возвращает True, если обновление выполнено."""
     row = query_one("SELECT id, user_id, plan, status FROM subscription_payments WHERE yookassa_payment_id = %s", (yookassa_id,))
     if not row or row.get("status") == "succeeded":
-        return "", 200
+        return False
     user_id = row["user_id"]
     db_plan = row["plan"]
     now = dt.datetime.utcnow()
     user = query_one("SELECT subscription_ends_at FROM users WHERE id = %s", (user_id,))
     if not user:
-        return "", 200
+        return False
     ends_at = user.get("subscription_ends_at")
     if ends_at and ends_at > now:
         new_ends = ends_at + dt.timedelta(days=30)
@@ -384,7 +369,69 @@ def webhook_yookassa():
         new_ends = now + dt.timedelta(days=30)
     execute("UPDATE users SET plan = %s, subscription_ends_at = %s WHERE id = %s", (db_plan, new_ends, user_id))
     execute("UPDATE subscription_payments SET status = 'succeeded' WHERE yookassa_payment_id = %s", (yookassa_id,))
+    return True
+
+
+@app.post("/api/webhooks/yookassa")
+def webhook_yookassa():
+    """Входящие уведомления ЮKassa. При payment.succeeded продлеваем подписку."""
+    raw = request.get_data(as_text=True)
+    app.logger.info("YooKassa webhook received, body length=%s", len(raw or ""))
+    try:
+        payload = json.loads(raw) if raw else {}
+    except json.JSONDecodeError as e:
+        app.logger.warning("YooKassa webhook invalid JSON: %s", e)
+        return "", 400
+    event = payload.get("event")
+    obj = payload.get("object", {})
+    yookassa_id = obj.get("id")
+    app.logger.info("YooKassa webhook event=%s payment_id=%s status=%s", event, yookassa_id, obj.get("status"))
+    if event != "payment.succeeded":
+        return "", 200
+    status = obj.get("status")
+    if not yookassa_id or status != "succeeded":
+        return "", 200
+    applied = _apply_payment_succeeded(yookassa_id)
+    app.logger.info("YooKassa payment %s applied=%s", yookassa_id, applied)
     return "", 200
+
+
+@app.post("/api/subscription/sync-after-payment")
+def sync_after_payment():
+    """После возврата с ЮKassa: проверяем последний pending-платёж через API и при успехе продлеваем подписку."""
+    payload = _parse_auth()
+    if not payload:
+        return _err("Unauthorized", 401)
+    user_id = int(payload["sub"])
+    if not Config.YOOKASSA_SHOP_ID or not Config.YOOKASSA_SECRET_KEY:
+        return _err("Payments not configured", 503)
+
+    row = query_one(
+        "SELECT yookassa_payment_id, plan, status FROM subscription_payments WHERE user_id = %s AND status = 'pending' ORDER BY created_at DESC LIMIT 1",
+        (user_id,),
+    )
+    if not row:
+        return _ok({"synced": False, "reason": "no_pending_payment"})
+
+    yookassa_id = row["yookassa_payment_id"]
+    try:
+        resp = requests.get(
+            f"{Config.YOOKASSA_API_URL}/payments/{yookassa_id}",
+            headers={"Authorization": _yookassa_auth_header()},
+            timeout=10,
+        )
+    except Exception as e:
+        app.logger.warning("YooKassa GET payment error: %s", e)
+        return _err("Payment service error", 502)
+    data = resp.json() if resp.headers.get("content-type", "").startswith("application/json") else {}
+    if resp.status_code != 200:
+        return _ok({"synced": False, "reason": "payment_fetch_failed"})
+    if data.get("status") != "succeeded":
+        return _ok({"synced": False, "reason": "payment_not_succeeded", "status": data.get("status")})
+
+    applied = _apply_payment_succeeded(yookassa_id)
+    app.logger.info("sync-after-payment user_id=%s yookassa_id=%s applied=%s", user_id, yookassa_id, applied)
+    return _ok({"synced": applied})
 
 
 # ---------------------------------------------------------------------------
