@@ -926,6 +926,65 @@ def get_bot_config():
     )
 
 
+DEVELOPER_CONFIG_USER_ID = 1
+
+
+@app.get("/api/developer/config")
+def get_developer_config():
+    """Read-only bot config for user_id=1. Only available for PRO+ subscribers."""
+    user, error = _require_auth_user_or_401()
+    if error:
+        return error
+    current_user_id = int(user["sub"])
+    row = query_one("SELECT plan FROM users WHERE id = %s", (current_user_id,))
+    if not row or row.get("plan") != "PRO_PLUS":
+        return _err("Developer config is available on PRO+ plan only", 403)
+
+    cfg = query_one(
+        "SELECT * FROM bot_configs WHERE user_id = %s",
+        (DEVELOPER_CONFIG_USER_ID,),
+    )
+    if not cfg:
+        return _err("Developer config not found", 404)
+
+    pairs = query_all(
+        "SELECT pair_index, symbol_basket1, symbol_basket2 "
+        "FROM basket_pairs WHERE bot_config_id = %s "
+        "ORDER BY pair_index",
+        (cfg["id"],),
+    )
+    baskets = [
+        {"basket1": p["symbol_basket1"], "basket2": p["symbol_basket2"]}
+        for p in pairs
+    ]
+    params = {
+        "position_size_pct": float(cfg["position_size_pct"]),
+        "orders_per_trade": int(cfg["orders_per_trade"]),
+        "entry_spread_pct": float(cfg["entry_spread_pct"]),
+        "take_profit_pct": float(cfg["take_profit_pct"]),
+        "dca_count": int(cfg["dca_count"]),
+        "dca_step_pct": float(cfg["dca_step_pct"]),
+        "stop_loss_pct": float(cfg["stop_loss_pct"]),
+        "stop_loss_enabled": bool(cfg["stop_loss_enabled"]),
+        "leverage": int(cfg["leverage"]),
+    }
+    modes = {
+        "no_new_position": bool(cfg["no_new_position"]),
+        "simulation_mode": bool(cfg["simulation_mode"]),
+    }
+    error_handling = {
+        "error_filter_enabled": bool(cfg.get("error_filter_enabled", 0)),
+        "error_filter_pattern": cfg.get("error_filter_pattern", ""),
+        "error_retry_count": int(cfg.get("error_retry_count", 0)),
+    }
+    return _ok({
+        "baskets": baskets,
+        "params": params,
+        "modes": modes,
+        "error_handling": error_handling,
+    })
+
+
 @app.put("/api/bot/config")
 def update_bot_config():
     user, error = _require_auth_user_or_401()
