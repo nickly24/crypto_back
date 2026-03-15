@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import base64
 import datetime as dt
 import json
 import time
+import uuid
 from typing import Any, Dict
 
 import bcrypt
@@ -60,6 +62,18 @@ def _err(message: str, code: int = 400):
     return jsonify({"ok": False, "error": message}), code
 
 
+def _format_subscription(user: dict) -> Dict[str, Any]:
+    """Извлекает plan и subscription_ends_at из строки users, формат для API."""
+    plan = user.get("plan") or "FREE"
+    if plan == "PRO_PLUS":
+        plan = "PRO+"
+    ends = user.get("subscription_ends_at")
+    return {
+        "plan": plan,
+        "subscription_ends_at": ends.isoformat() if ends else None,
+    }
+
+
 app = Flask(__name__)
 app.config["SECRET_KEY"] = Config.SECRET_KEY
 
@@ -85,7 +99,7 @@ def auth_login():
         return _err("Email и пароль обязательны", 422)
 
     user = query_one(
-        "SELECT id, email, password_hash, role, is_blocked "
+        "SELECT id, email, password_hash, role, is_blocked, plan, subscription_ends_at "
         "FROM users WHERE email = %s",
         (email,),
     )
@@ -99,6 +113,7 @@ def auth_login():
         return _err("Неверный логин или пароль", 401)
 
     token = _make_token(user)
+    sub = _format_subscription(user)
     return _ok(
         {
             "access_token": token,
@@ -107,6 +122,7 @@ def auth_login():
                 "id": user["id"],
                 "email": user["email"],
                 "role": user["role"],
+                **sub,
             },
         }
     )
@@ -117,11 +133,19 @@ def auth_me():
     payload = _parse_auth()
     if not payload:
         return _err("Unauthorized", 401)
+    user = query_one(
+        "SELECT id, email, role, plan, subscription_ends_at FROM users WHERE id = %s",
+        (int(payload["sub"]),),
+    )
+    if not user:
+        return _err("User not found", 404)
+    sub = _format_subscription(user)
     return _ok(
         {
-            "id": int(payload["sub"]),
-            "email": payload["email"],
-            "role": payload["role"],
+            "id": user["id"],
+            "email": user["email"],
+            "role": user["role"],
+            **sub,
         }
     )
 
@@ -136,7 +160,7 @@ def admin_login():
         return _err("Email и пароль обязательны", 422)
 
     user = query_one(
-        "SELECT id, email, password_hash, role, is_blocked "
+        "SELECT id, email, password_hash, role, is_blocked, plan, subscription_ends_at "
         "FROM users WHERE email = %s",
         (email,),
     )
@@ -152,6 +176,7 @@ def admin_login():
         return _err("Неверный логин или пароль", 401)
 
     token = _make_token(user)
+    sub = _format_subscription(user)
     return _ok(
         {
             "access_token": token,
@@ -160,6 +185,7 @@ def admin_login():
                 "id": user["id"],
                 "email": user["email"],
                 "role": user["role"],
+                **sub,
             },
         }
     )
@@ -170,13 +196,195 @@ def admin_me():
     payload = _parse_auth()
     if not payload or payload.get("role") != "admin":
         return _err("Unauthorized", 401)
+    user = query_one(
+        "SELECT id, email, role, plan, subscription_ends_at FROM users WHERE id = %s",
+        (int(payload["sub"]),),
+    )
+    if not user:
+        return _err("User not found", 404)
+    sub = _format_subscription(user)
     return _ok(
         {
-            "id": int(payload["sub"]),
-            "email": payload["email"],
-            "role": payload["role"],
+            "id": user["id"],
+            "email": user["email"],
+            "role": user["role"],
+            **sub,
         }
     )
+
+
+@app.get("/api/subscription")
+def get_subscription():
+    """Возвращает план и дату окончания подписки текущего пользователя."""
+    payload = _parse_auth()
+    if not payload:
+        return _err("Unauthorized", 401)
+    user = query_one(
+        "SELECT plan, subscription_ends_at FROM users WHERE id = %s",
+        (int(payload["sub"]),),
+    )
+    if not user:
+        return _err("User not found", 404)
+    return _ok(_format_subscription(user))
+
+
+@app.post("/api/subscription/purchase")
+def purchase_subscription():
+    """Покупка/продление подписки. Body: { plan: "PRO" | "PRO+" }. Пока без реальной оплаты — сразу продлевает на 30 дней."""
+    payload = _parse_auth()
+    if not payload:
+        return _err("Unauthorized", 401)
+    user_id = int(payload["sub"])
+    body = request.get_json(silent=True) or {}
+    plan_raw = (body.get("plan") or "").strip().upper().replace(" ", "")
+    if plan_raw in ("PRO", "PRO+"):
+        db_plan = "PRO_PLUS" if plan_raw == "PRO+" else "PRO"
+    else:
+        return _err("Invalid plan. Use PRO or PRO+", 422)
+
+    user = query_one(
+        "SELECT plan, subscription_ends_at FROM users WHERE id = %s",
+        (user_id,),
+    )
+    if not user:
+        return _err("User not found", 404)
+
+    now = dt.datetime.utcnow()
+    ends_at = user.get("subscription_ends_at")
+    if ends_at and ends_at > now:
+        new_ends = ends_at + dt.timedelta(days=30)
+    else:
+        new_ends = now + dt.timedelta(days=30)
+
+    execute(
+        "UPDATE users SET plan = %s, subscription_ends_at = %s WHERE id = %s",
+        (db_plan, new_ends, user_id),
+    )
+    return _ok({
+        "plan": "PRO+" if db_plan == "PRO_PLUS" else "PRO",
+        "subscription_ends_at": new_ends.isoformat(),
+    })
+
+
+def _yookassa_auth_header() -> str:
+    raw = f"{Config.YOOKASSA_SHOP_ID}:{Config.YOOKASSA_SECRET_KEY}"
+    return "Basic " + base64.b64encode(raw.encode()).decode()
+
+
+@app.get("/api/subscription/prices")
+def get_subscription_prices():
+    """Цены тарифов в рублях из БД."""
+    rows = query_all("SELECT plan, amount_rub FROM tariff_prices ORDER BY amount_rub")
+    prices = {}
+    for r in rows:
+        plan = "PRO+" if r["plan"] == "PRO_PLUS" else r["plan"]
+        prices[plan] = float(r["amount_rub"])
+    return _ok({"prices": prices})
+
+
+@app.post("/api/subscription/create-payment")
+def create_subscription_payment():
+    """Создаёт платёж в ЮKassa, возвращает confirmation_url для редиректа."""
+    payload = _parse_auth()
+    if not payload:
+        return _err("Unauthorized", 401)
+    user_id = int(payload["sub"])
+    if not Config.YOOKASSA_SHOP_ID or not Config.YOOKASSA_SECRET_KEY:
+        return _err("Payments not configured", 503)
+
+    body = request.get_json(silent=True) or {}
+    plan_raw = (body.get("plan") or "").strip().upper().replace(" ", "")
+    if plan_raw not in ("PRO", "PRO+"):
+        return _err("Invalid plan. Use PRO or PRO+", 422)
+    db_plan = "PRO_PLUS" if plan_raw == "PRO+" else "PRO"
+
+    row = query_one("SELECT amount_rub FROM tariff_prices WHERE plan = %s", (db_plan,))
+    if not row:
+        return _err("Tariff not found", 404)
+    amount_rub = float(row["amount_rub"])
+    if amount_rub <= 0:
+        return _err("Invalid tariff price", 400)
+
+    return_url = (Config.FRONTEND_ORIGIN or "").rstrip("/") + "/dashboard?payment=success"
+    if not return_url.startswith("http"):
+        return_url = "http://localhost:3000/dashboard?payment=success"
+
+    yookassa_body = {
+        "amount": {"value": f"{amount_rub:.2f}", "currency": "RUB"},
+        "capture": True,
+        "confirmation": {"type": "redirect", "return_url": return_url},
+        "description": f"Подписка {plan_raw} на 30 дней",
+    }
+    idem_key = str(uuid.uuid4())
+    try:
+        resp = requests.post(
+            f"{Config.YOOKASSA_API_URL}/payments",
+            headers={
+                "Authorization": _yookassa_auth_header(),
+                "Idempotence-Key": idem_key,
+                "Content-Type": "application/json",
+            },
+            json=yookassa_body,
+            timeout=10,
+        )
+    except Exception as e:
+        return _err(f"Payment service error: {e}", 502)
+    data = resp.json() if resp.headers.get("content-type", "").startswith("application/json") else {}
+    if resp.status_code != 200:
+        return _err(data.get("description", data.get("message", "YooKassa error")), 400)
+
+    yookassa_id = data.get("id")
+    confirmation = data.get("confirmation", {})
+    confirmation_url = confirmation.get("confirmation_url") or ""
+    if not yookassa_id or not confirmation_url:
+        return _err("Invalid YooKassa response", 502)
+
+    execute(
+        "INSERT INTO subscription_payments (user_id, plan, amount_rub, yookassa_payment_id, status) VALUES (%s, %s, %s, %s, 'pending')",
+        (user_id, db_plan, amount_rub, yookassa_id),
+    )
+    return _ok({
+        "payment_id": yookassa_id,
+        "confirmation_url": confirmation_url,
+        "amount_rub": amount_rub,
+        "plan": "PRO+" if db_plan == "PRO_PLUS" else "PRO",
+    })
+
+
+@app.post("/api/webhooks/yookassa")
+def webhook_yookassa():
+    """Входящие уведомления ЮKassa. При payment.succeeded продлеваем подписку."""
+    raw = request.get_data(as_text=True)
+    try:
+        payload = json.loads(raw) if raw else {}
+    except json.JSONDecodeError:
+        return "", 400
+    event = payload.get("event")  # payment.succeeded / payment.canceled / ...
+    obj = payload.get("object", {})
+    if event != "payment.succeeded":
+        return "", 200
+    yookassa_id = obj.get("id")
+    status = obj.get("status")
+    if not yookassa_id or status != "succeeded":
+        return "", 200
+
+    row = query_one("SELECT id, user_id, plan, status FROM subscription_payments WHERE yookassa_payment_id = %s", (yookassa_id,))
+    if not row or row.get("status") == "succeeded":
+        return "", 200
+    user_id = row["user_id"]
+    db_plan = row["plan"]
+    now = dt.datetime.utcnow()
+    user = query_one("SELECT subscription_ends_at FROM users WHERE id = %s", (user_id,))
+    if not user:
+        return "", 200
+    ends_at = user.get("subscription_ends_at")
+    if ends_at and ends_at > now:
+        new_ends = ends_at + dt.timedelta(days=30)
+    else:
+        new_ends = now + dt.timedelta(days=30)
+    execute("UPDATE users SET plan = %s, subscription_ends_at = %s WHERE id = %s", (db_plan, new_ends, user_id))
+    execute("UPDATE subscription_payments SET status = 'succeeded' WHERE yookassa_payment_id = %s", (yookassa_id,))
+    return "", 200
 
 
 # ---------------------------------------------------------------------------

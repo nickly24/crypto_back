@@ -40,3 +40,8 @@ class Config:
     # Encryption (Fernet) — тот же ключ, что и в bot_manager (общая БД user_settings)
     ENCRYPTION_KEY: str = os.getenv("ENCRYPTION_KEY", "dvKM1FbZzPZ--aLlGtqckBYuHVgwNaDGiILZNeP_lKY=")
 
+    # YooKassa (самозанятый / магазин)
+    YOOKASSA_SHOP_ID: str = os.getenv("YOOKASSA_SHOP_ID", "")
+    YOOKASSA_SECRET_KEY: str = os.getenv("YOOKASSA_SECRET_KEY", "")
+    YOOKASSA_API_URL: str = "https://api.yookassa.ru/v3"
+
