@@ -77,22 +77,30 @@ def _format_subscription(user: dict) -> Dict[str, Any]:
 app = Flask(__name__)
 app.config["SECRET_KEY"] = Config.SECRET_KEY
 
+ALLOWED_CORS_ORIGINS = {
+    "http://localhost:3000",
+    "https://nickly24-crypto-front-a2d6.twc1.net",
+}
+
 CORS(
     app,
-    resources={r"/api/*": {"origins": "*"}},
-    supports_credentials=False,
+    resources={r"/api/*": {"origins": list(ALLOWED_CORS_ORIGINS)}},
+    supports_credentials=True,
 )
 
 
 @app.after_request
 def add_cors_headers(response):
-    # Дополнительно гарантируем CORS для всех /api/* маршрутов
     origin = request.headers.get("Origin")
-    allow_origin = Config.FRONTEND_ORIGIN or origin or "*"
+    if origin in ALLOWED_CORS_ORIGINS:
+        allow_origin = origin
+    else:
+        allow_origin = Config.FRONTEND_ORIGIN or origin or "*"
     response.headers.setdefault("Access-Control-Allow-Origin", allow_origin)
     response.headers.setdefault("Vary", "Origin")
     response.headers.setdefault("Access-Control-Allow-Headers", "Content-Type, Authorization")
     response.headers.setdefault("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
+    response.headers.setdefault("Access-Control-Allow-Credentials", "true")
     return response
 
 
