@@ -84,6 +84,18 @@ CORS(
 )
 
 
+@app.after_request
+def add_cors_headers(response):
+    # Дополнительно гарантируем CORS для всех /api/* маршрутов
+    origin = request.headers.get("Origin")
+    allow_origin = Config.FRONTEND_ORIGIN or origin or "*"
+    response.headers.setdefault("Access-Control-Allow-Origin", allow_origin)
+    response.headers.setdefault("Vary", "Origin")
+    response.headers.setdefault("Access-Control-Allow-Headers", "Content-Type, Authorization")
+    response.headers.setdefault("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
+    return response
+
+
 @app.get("/api/health")
 def health():
     return _ok({"status": "ok"})
@@ -774,6 +786,153 @@ def get_chart_candles():
             "v": float(row[5]),
         })
     return _ok({"candles": candles})
+
+
+# ---------------------------------------------------------------------------
+# Live OKX positions (per-user keys from DB)
+# ---------------------------------------------------------------------------
+
+
+def _get_okx_keys_for_user(user_id: int) -> dict | None:
+    row = query_one(
+        "SELECT okx_api_key, okx_secret_key, okx_passphrase "
+        "FROM user_settings WHERE user_id = %s",
+        (user_id,),
+    )
+    if not row or not row.get("okx_api_key"):
+        return None
+    from crypto.encryption import decrypt
+
+    return {
+        "api_key": decrypt(row["okx_api_key"]) or "",
+        "secret_key": decrypt(row["okx_secret_key"]) or "",
+        "passphrase": decrypt(row["okx_passphrase"]) or "",
+    }
+
+
+def _okx_sdk_get_positions(api_key: str, secret_key: str, passphrase: str) -> dict:
+    """
+    Получаем позиции через тот же OKXClient, что использует bot_manager,
+    чтобы результат точно совпадал с тем, что видит бот.
+    """
+    import os
+    import sys
+    from pathlib import Path
+
+    # Добавляем bot_manager в sys.path
+    root = Path(__file__).resolve().parent.parent
+    bot_manager = root / "bot_manager"
+    if str(bot_manager) not in sys.path:
+        sys.path.insert(0, str(bot_manager))
+
+    # Импортируем OKXClient из bot_manager
+    from trading.okx_client import OKXClient  # type: ignore
+    from config import Config as BMConfig  # type: ignore
+
+    demo = getattr(BMConfig, "OKX_DEMO", "0") == "1"
+    client = OKXClient(api_key=api_key, secret_key=secret_key, passphrase=passphrase, demo=demo)
+    # Через SDK получаем полный ответ, чтобы можно было логировать "как есть".
+    r = client.account.get_positions(instType="SWAP")
+    return r
+
+
+@app.get("/api/bot/positions-live")
+def bot_positions_live():
+    """Текущие позиции с биржи OKX: цена, ликвидация, плечо, upl."""
+    user, error = _require_auth_user_or_401()
+    if error:
+        return error
+    user_id = int(user["sub"])
+
+    keys = _get_okx_keys_for_user(user_id)
+    if not keys:
+        app.logger.warning("positions-live: no OKX keys for user_id=%s", user_id)
+        return _err("OKX keys not configured", 400)
+
+    try:
+        raw_resp = _okx_sdk_get_positions(
+            keys["api_key"], keys["secret_key"], keys["passphrase"]
+        )
+    except Exception as e:
+        app.logger.exception("positions-live: OKX API error for user_id=%s: %s", user_id, e)
+        return _err(f"OKX API error: {e}", 502)
+
+    import json as _json
+
+    try:
+        app.logger.info(
+            "positions-live: OKX get_positions raw response for user_id=%s: %s",
+            user_id,
+            _json.dumps(raw_resp, ensure_ascii=False)[:2000],
+        )
+    except Exception:
+        app.logger.info(
+            "positions-live: OKX get_positions raw response for user_id=%s (non-serializable type %s)",
+            user_id,
+            type(raw_resp),
+        )
+
+    raw_positions = raw_resp.get("data", []) if isinstance(raw_resp, dict) else []
+
+    app.logger.info(
+        "positions-live: fetched %d raw positions from OKX for user_id=%s",
+        len(raw_positions or []),
+        user_id,
+    )
+
+    out: list[dict] = []
+    for p in raw_positions:
+        if p.get("instType") not in (None, "", "SWAP"):
+            continue
+        settle_ccy = p.get("settleCcy") or p.get("ccy")
+        if settle_ccy != "USDT":
+            continue
+        pos_str = p.get("pos") or "0"
+        try:
+            pos = float(pos_str)
+        except (TypeError, ValueError):
+            continue
+        if pos == 0:
+            continue
+        try:
+            avg_px = float(p.get("avgPx") or 0)
+            mark_px = float(p.get("markPx") or 0)
+            liq_px = float(p.get("liqPx") or 0)
+            lever = float(p.get("lever") or 0)
+            upl = float(p.get("upl") or 0)
+        except (TypeError, ValueError):
+            continue
+
+        side = "long" if pos > 0 else "short"
+        distance_pct: float | None = None
+        if liq_px > 0 and mark_px > 0:
+            if side == "long":
+                distance_pct = (mark_px - liq_px) / mark_px * 100.0
+            else:
+                distance_pct = (liq_px - mark_px) / mark_px * 100.0
+
+        out.append(
+            {
+                "instId": p.get("instId"),
+                "side": side,
+                "qty": abs(pos),
+                "avgPx": avg_px,
+                "markPx": mark_px,
+                "liqPx": liq_px,
+                "lever": lever,
+                "upl": upl,
+                "distance_to_liq_pct": distance_pct,
+            }
+        )
+
+    if not out:
+        app.logger.warning(
+            "positions-live: no non-zero USDT-SWAP positions after filtering (raw=%d) for user_id=%s",
+            len(raw_positions or []),
+            user_id,
+        )
+
+    return _ok({"positions": out})
 
 
 # ---------------------------------------------------------------------------

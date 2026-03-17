@@ -40,6 +40,9 @@ class Config:
     # Encryption (Fernet) — тот же ключ, что и в bot_manager (общая БД user_settings)
     ENCRYPTION_KEY: str = os.getenv("ENCRYPTION_KEY", "dvKM1FbZzPZ--aLlGtqckBYuHVgwNaDGiILZNeP_lKY=")
 
+    # OKX: demo / real flag (совместимо с bot_manager.Config.OKX_DEMO)
+    OKX_DEMO: str = os.getenv("OKX_DEMO", "0")
+
     # YooKassa (самозанятый / магазин)
     YOOKASSA_SHOP_ID: str = os.getenv("YOOKASSA_SHOP_ID", "")
     YOOKASSA_SECRET_KEY: str = os.getenv("YOOKASSA_SECRET_KEY", "")
