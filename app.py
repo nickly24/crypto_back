@@ -823,26 +823,18 @@ def _okx_sdk_get_positions(api_key: str, secret_key: str, passphrase: str) -> di
     Получаем позиции через тот же OKXClient, что использует bot_manager,
     чтобы результат точно совпадал с тем, что видит бот.
     """
-    import os
-    import sys
-    from pathlib import Path
+    import okx.Account as OkxAccount  # type: ignore
+    from config import Config
 
-    # Добавляем bot_manager в sys.path
-    # В проде `app.py` обычно лежит как `/app/app.py`, а `bot_manager` — рядом, в `/app/bot_manager`.
-    # Поэтому корнем считаем директорию файла, а не `..`.
-    root = Path(__file__).resolve().parent
-    bot_manager = root / "bot_manager"
-    if str(bot_manager) not in sys.path:
-        sys.path.insert(0, str(bot_manager))
+    # Используем тот же флаг demo/real, что и у бэкенда.
+    demo = getattr(Config, "OKX_DEMO", "0") == "1"
+    flag = "1" if demo else "0"
 
-    # Импортируем OKXClient из bot_manager
-    from trading.okx_client import OKXClient  # type: ignore
-    from config import Config as BMConfig  # type: ignore
-
-    demo = getattr(BMConfig, "OKX_DEMO", "0") == "1"
-    client = OKXClient(api_key=api_key, secret_key=secret_key, passphrase=passphrase, demo=demo)
-    # Через SDK получаем полный ответ, чтобы можно было логировать "как есть".
-    r = client.account.get_positions(instType="SWAP")
+    # Минимальное использование python-okx SDK, чтобы не зависеть от bot_manager.trading.
+    client = OkxAccount.AccountAPI(api_key, secret_key, passphrase, False, flag)
+    r = client.get_positions(instType="SWAP")
+    # SDK возвращает dict с ключами code/data и т.п. — интерфейс совместим с тем,
+    # как ожидает остальной код (см. bot_manager.okx_client).
     return r
 
 
