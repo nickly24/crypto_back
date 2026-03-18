@@ -828,7 +828,9 @@ def _okx_sdk_get_positions(api_key: str, secret_key: str, passphrase: str) -> di
     from pathlib import Path
 
     # Добавляем bot_manager в sys.path
-    root = Path(__file__).resolve().parent.parent
+    # В проде `app.py` обычно лежит как `/app/app.py`, а `bot_manager` — рядом, в `/app/bot_manager`.
+    # Поэтому корнем считаем директорию файла, а не `..`.
+    root = Path(__file__).resolve().parent
     bot_manager = root / "bot_manager"
     if str(bot_manager) not in sys.path:
         sys.path.insert(0, str(bot_manager))
