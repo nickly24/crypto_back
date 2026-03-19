@@ -6,4 +6,5 @@ bcrypt
 PyJWT
 requests
 cryptography
+python-okx
 
