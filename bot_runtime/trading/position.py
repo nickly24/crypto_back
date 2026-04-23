@@ -1,6 +1,15 @@
+"""
+Position manager — entry, DCA, exit logic for pair-trading.
+
+Coordinates with OKXClient to place orders and with SpreadCalculator
+for trading signals.
+"""
+
 from __future__ import annotations
 
+import json
 import logging
+import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -34,6 +43,11 @@ class PositionState:
 
 
 class PositionManager:
+    """
+    Decides when to enter/exit/DCA based on bot_configs parameters.
+    Executes trades via OKXClient.
+    """
+
     def __init__(
         self,
         okx: OKXClient,
@@ -48,6 +62,10 @@ class PositionManager:
         self.state = PositionState()
         self.entry_cooldown = False
 
+    # ------------------------------------------------------------------
+    # Config helpers
+    # ------------------------------------------------------------------
+
     @property
     def entry_threshold(self) -> float:
         return float(self.cfg.get("entry_spread_pct", 2.0))
@@ -55,14 +73,6 @@ class PositionManager:
     @property
     def take_profit_pct(self) -> float:
         return float(self.cfg.get("take_profit_pct", 0.8))
-
-    @property
-    def stop_loss_pct(self) -> float:
-        return float(self.cfg.get("stop_loss_pct", 4.0))
-
-    @property
-    def stop_loss_enabled(self) -> bool:
-        return bool(self.cfg.get("stop_loss_enabled", False))
 
     @property
     def dca_max(self) -> int:
@@ -73,12 +83,12 @@ class PositionManager:
         return float(self.cfg.get("dca_step_pct", 3.0))
 
     @property
-    def no_new_position(self) -> bool:
-        return bool(self.cfg.get("no_new_position", True))
+    def stop_loss_pct(self) -> float:
+        return float(self.cfg.get("stop_loss_pct", 4.0))
 
     @property
-    def simulation_mode(self) -> bool:
-        return bool(self.cfg.get("simulation_mode", False))
+    def stop_loss_enabled(self) -> bool:
+        return bool(self.cfg.get("stop_loss_enabled", False))
 
     @property
     def leverage(self) -> int:
@@ -88,70 +98,522 @@ class PositionManager:
     def position_size_pct(self) -> float:
         return float(self.cfg.get("position_size_pct", 200.0))
 
+    @property
+    def no_new_position(self) -> bool:
+        return bool(self.cfg.get("no_new_position", True))
+
+    @property
+    def simulation_mode(self) -> bool:
+        return bool(self.cfg.get("simulation_mode", False))
+
+    # ------------------------------------------------------------------
+    # Restore state from DB
+    # ------------------------------------------------------------------
+
     def restore(self, db_state: dict) -> None:
         self.state.is_open = bool(db_state.get("position_open"))
         self.state.long_basket = db_state.get("long_basket")
         self.state.short_basket = db_state.get("short_basket")
         self.state.entry_spread = float(db_state.get("entry_spread_pct") or 0)
         self.state.dca_count = int(db_state.get("dca_count_current") or 0)
+        et = db_state.get("entry_time")
+        self.state.entry_time = et if isinstance(et, datetime) else None
 
-    def evaluate(self) -> str | tuple[str, dict] | None:
+        pd = db_state.get("positions_data")
+        if pd:
+            self.state.positions = json.loads(pd) if isinstance(pd, str) else pd
+        log.info("Position state restored: %s", self.state.to_dict())
+
+    # ------------------------------------------------------------------
+    # Trading signals evaluation (called every tick)
+    # ------------------------------------------------------------------
+
+    def evaluate(self) -> str | None:
+        """
+        Check spread against thresholds and return action taken:
+        'entry', 'dca', 'take_profit', 'stop_loss', or None.
+        """
         spread = self.sc.spread()
         abs_spread = abs(spread)
+
         if not self.state.is_open:
-            if abs_spread >= self.entry_threshold and not (self.no_new_position or self.entry_cooldown):
+            if abs_spread >= self.entry_threshold:
+                if self.no_new_position or self.entry_cooldown:
+                    return None
                 return self._open_position(spread)
             return None
+
         pnl = self._unrealised_pnl()
-        if pnl >= self.take_profit_pct:
-            snap = self.state.to_dict()
-            self._close_position()
-            return ("take_profit", snap)
+        tp = self.take_profit_pct
+
+        if pnl >= tp:
+            snapshot = self.state.to_dict()
+            self._close_position("take_profit", pnl, spread)
+            return ("take_profit", snapshot)
+
         if self.stop_loss_enabled and pnl <= -self.stop_loss_pct:
-            snap = self.state.to_dict()
-            self._close_position()
-            return ("stop_loss", snap)
+            snapshot = self.state.to_dict()
+            self._close_position("stop_loss", pnl, spread)
+            return ("stop_loss", snapshot)
+
         dca_threshold = self.entry_threshold + (self.state.dca_count + 1) * self.dca_step
         if abs_spread >= dca_threshold and self.state.dca_count < self.dca_max:
-            self.state.dca_count += 1
-            return "dca"
+            return self._dca(spread)
+
         return None
 
+    # ------------------------------------------------------------------
+    # Unrealised P&L — приоритет: реальный upl с биржи, fallback: spread
+    # ------------------------------------------------------------------
+
+    def _unrealised_pnl_from_exchange(self) -> float | None:
+        """
+        Реальный unrealized PnL в % из суммы upl по позициям.
+        Returns None если нет данных (позиции не синхронизированы).
+        """
+        if not self.state.positions:
+            return None
+        total_upl = sum(float(p.get("upl", 0)) for p in self.state.positions.values())
+        exposure = 0.0
+        for inst_id, pos in self.state.positions.items():
+            try:
+                qty = float(pos.get("qty", 0))
+                avg_px = float(pos.get("avg_price", 0))
+                ct_val = self.okx.get_ct_val(inst_id)
+                exposure += qty * ct_val * avg_px
+            except (ValueError, KeyError):
+                continue
+        if exposure <= 0:
+            return None
+        return 100.0 * total_upl / exposure
+
+    def _unrealised_pnl(self) -> float:
+        """TP/SL: реальный upl с биржи (приоритет), иначе spread-based fallback."""
+        if not self.state.is_open:
+            return 0.0
+
+        real = self._unrealised_pnl_from_exchange()
+        if real is not None:
+            return real
+
+        current_spread = self.sc.spread()
+        spread_pnl = (
+            self.state.entry_spread - current_spread
+            if self.state.long_basket == "basket2"
+            else current_spread - self.state.entry_spread
+        )
+        if abs(spread_pnl) > 0.1:
+            log.debug("Using spread-based PnL (%.4f%%), no upl data yet", spread_pnl)
+        return spread_pnl
+
+    def get_pnl_breakdown(self) -> dict:
+        """Spread-based PnL (fallback, не учитывает slippage/комиссии)."""
+        r_b1 = self.sc.basket_return("basket1")
+        r_b2 = self.sc.basket_return("basket2")
+
+        if self.state.long_basket == "basket1":
+            pnl_long = r_b1
+            pnl_short = -r_b2
+        else:
+            pnl_long = r_b2
+            pnl_short = -r_b1
+
+        return {
+            "pnl_long_pct": round(pnl_long, 4),
+            "pnl_short_pct": round(pnl_short, 4),
+            "pnl_total_pct": round(pnl_long + pnl_short, 4),
+            "pnl_total_usdt": None,
+        }
+
+    def get_pnl_for_dashboard(self) -> dict:
+        """
+        Реальный PnL с биржи (upl) для отображения в админке.
+        При открытой позиции: upl из positions. Иначе — spread-based.
+        """
+        fallback = self.get_pnl_breakdown()
+        if not self.state.is_open or not self.state.positions:
+            return fallback
+
+        total_upl = sum(float(p.get("upl", 0)) for p in self.state.positions.values())
+        exposure = 0.0
+        for inst_id, pos in self.state.positions.items():
+            try:
+                qty = float(pos.get("qty", 0))
+                avg_px = float(pos.get("avg_price", 0))
+                ct_val = self.okx.get_ct_val(inst_id)
+                exposure += qty * ct_val * avg_px
+            except (ValueError, KeyError):
+                continue
+        if exposure <= 0:
+            return fallback
+
+        pnl_total_pct = 100.0 * total_upl / exposure
+        long_syms = set(
+            self.sc.symbols_b2 if self.state.long_basket == "basket2" else self.sc.symbols_b1
+        )
+        upl_long = sum(
+            float(p.get("upl", 0))
+            for inst, p in self.state.positions.items()
+            if inst in long_syms
+        )
+        upl_short = total_upl - upl_long
+        half_exp = exposure / 2.0
+        pnl_long_pct = 100.0 * upl_long / half_exp if half_exp else 0
+        pnl_short_pct = 100.0 * upl_short / half_exp if half_exp else 0
+
+        return {
+            "pnl_long_pct": round(pnl_long_pct, 4),
+            "pnl_short_pct": round(pnl_short_pct, 4),
+            "pnl_total_pct": round(pnl_total_pct, 4),
+            "pnl_total_usdt": round(total_upl, 2),
+        }
+
+    # ------------------------------------------------------------------
+    # Open / Close / DCA
+    # ------------------------------------------------------------------
+
     def _open_position(self, spread: float) -> str:
+        long_basket, short_basket = self.sc.direction()
+        log.info("ENTRY: spread=%.4f long=%s short=%s", spread, long_basket, short_basket)
+
+        if not self.simulation_mode:
+            try:
+                self._execute_entry(long_basket, short_basket)
+            except Exception:
+                log.exception("Failed to execute entry orders — position not opened")
+                raise
+
         self.state.is_open = True
-        self.state.long_basket, self.state.short_basket = self.sc.direction()
+        self.state.long_basket = long_basket
+        self.state.short_basket = short_basket
         self.state.entry_spread = spread
         self.state.entry_time = datetime.utcnow()
         self.state.dca_count = 0
         return "entry"
 
-    def _close_position(self) -> None:
-        self.state = PositionState()
+    def _dca(self, spread: float) -> str:
+        self.state.dca_count += 1
+        log.info(
+            "DCA #%d: spread=%.4f long=%s short=%s",
+            self.state.dca_count, spread,
+            self.state.long_basket, self.state.short_basket,
+        )
+        if not self.simulation_mode:
+            try:
+                self._execute_entry(self.state.long_basket, self.state.short_basket)
+            except Exception:
+                log.exception("Failed to execute DCA orders")
+                self.state.dca_count -= 1
+                raise
+        return "dca"
 
-    def _unrealised_pnl(self) -> float:
-        if not self.state.is_open:
-            return 0.0
-        current_spread = self.sc.spread()
-        if self.state.long_basket == "basket2":
-            return self.state.entry_spread - current_spread
-        return current_spread - self.state.entry_spread
-
-    def get_pnl_breakdown(self) -> dict:
-        pnl_total = self._unrealised_pnl() if self.state.is_open else 0.0
-        return {
-            "pnl_long_pct": round(pnl_total / 2, 4),
-            "pnl_short_pct": round(pnl_total / 2, 4),
-            "pnl_total_pct": round(pnl_total, 4),
-            "pnl_total_usdt": None,
-        }
-
-    def get_pnl_for_dashboard(self) -> dict:
-        return self.get_pnl_breakdown()
+    def _close_position(self, reason: str, pnl: float, spread: float) -> str:
+        log.info("CLOSE (%s): spread=%.4f pnl=%.4f%%", reason, spread, pnl)
+        if not self.simulation_mode:
+            self._execute_close()  # не ловим — при ошибке state не обнуляем, иначе «хвосты»
+        self.state.is_open = False
+        self.state.long_basket = None
+        self.state.short_basket = None
+        self.state.entry_spread = 0
+        self.state.entry_time = None
+        self.state.dca_count = 0
+        self.state.positions = {}
+        return reason
 
     def close_all(self) -> bool:
-        self.state = PositionState()
+        """
+        Force-close all positions (called on SIGUSR1 or manual command).
+        Returns True if close succeeded (or was simulation), False if OKX API failed.
+        """
+        if self.state.is_open and not self.simulation_mode:
+            try:
+                self._execute_close()
+            except Exception:
+                log.exception("Failed to execute close orders in close_all — positions may still be open on exchange")
+                return False
+        self.state.is_open = False
+        self.state.long_basket = None
+        self.state.short_basket = None
+        self.state.entry_spread = 0
+        self.state.entry_time = None
+        self.state.dca_count = 0
+        self.state.positions = {}
         return True
 
-    def sync_with_exchange(self) -> None:
-        return
+    # ------------------------------------------------------------------
+    # Execution helpers
+    # ------------------------------------------------------------------
 
+    def _get_price(self, sym: str) -> float:
+        price = self.sc.current_prices.get(sym, 0)
+        if price <= 0:
+            price = self.sc.reference_prices.get(sym, 0)
+        return price
+
+    def _format_sz_contract(self, val: float) -> str:
+        """
+        Форматирование размера `sz` для OKX без scientific notation.
+        Важно: при дробных контрактах нельзя резать int(), иначе OKX вернёт
+        `Parameter sz error` (51000).
+        """
+        if val == 0:
+            return "0"
+        s = f"{abs(val):.16f}".rstrip("0").rstrip(".")
+        return s if s else "0"
+
+    def _execute_entry(self, long_basket: str, short_basket: str) -> None:
+        required = len(self.sc.all_symbols)
+        balance = self.okx.get_balance()
+        avail = balance["avail_eq"]
+        # Бюджет на одну пару (2 инструмента: long + short). На каждый ордер — половина пары.
+        per_pair_usdt = (avail * self.position_size_pct / 100.0) / len(self.sc.pairs)
+        per_instrument_usdt = per_pair_usdt / 2.0
+        log.info(
+            "Entry calc: avail=%.2f, size_pct=%.0f%%, pairs=%d, per_instrument=%.2f USDT, required=%d",
+            avail, self.position_size_pct, len(self.sc.pairs), per_instrument_usdt, required,
+        )
+
+        missing = [s for s in self.sc.all_symbols if self.sc.current_prices.get(s, 0) <= 0]
+        if missing:
+            fetched = self.okx.fetch_ticker_prices(missing)
+            for sym, px in fetched.items():
+                if px > 0:
+                    self.sc.current_prices[sym] = px
+            still_missing = [s for s in self.sc.all_symbols if self.sc.current_prices.get(s, 0) <= 0]
+            if still_missing:
+                log.error("Entry ABORT: no prices for %s", still_missing)
+                if self.log_event:
+                    self.log_event("error", f"Entry aborted: no prices for {still_missing}", {"missing": still_missing})
+                return
+
+        orders = []
+        long_symbols = self.sc.symbols_b1 if long_basket == "basket1" else self.sc.symbols_b2
+        short_symbols = self.sc.symbols_b2 if long_basket == "basket1" else self.sc.symbols_b1
+
+        def _format_sz(val: int | float) -> str:
+            if val >= 1:
+                return str(int(val))
+            return f"{val:.10g}".rstrip("0").rstrip(".")
+
+        for sym in long_symbols:
+            price = self._get_price(sym)
+            sz = self.okx.usdt_to_contracts(sym, per_instrument_usdt, price)
+            if sz <= 0:
+                lot = self.okx.get_lot_sz(sym)
+                sz = max(lot, 1.0) if lot > 0 else 1
+                log.warning("LONG %s: sz was 0, using min %s", sym, sz)
+            orders.append({
+                "instId": sym, "tdMode": "cross",
+                "side": "buy", "ordType": "market", "sz": _format_sz(sz),
+            })
+
+        for sym in short_symbols:
+            price = self._get_price(sym)
+            sz = self.okx.usdt_to_contracts(sym, per_instrument_usdt, price)
+            if sz <= 0:
+                lot = self.okx.get_lot_sz(sym)
+                sz = max(lot, 1.0) if lot > 0 else 1
+                log.warning("SHORT %s: sz was 0, using min %s", sym, sz)
+            orders.append({
+                "instId": sym, "tdMode": "cross",
+                "side": "sell", "ordType": "market", "sz": _format_sz(sz),
+            })
+
+        if len(orders) != required:
+            log.error("Entry ABORT: built %d orders, required %d", len(orders), required)
+            if self.log_event:
+                self.log_event("error", f"Entry aborted: {len(orders)}/{required} orders", {"built": len(orders), "required": required})
+            return
+
+        results = self.okx.place_batch_orders(orders)
+        failed = []
+        for i in range(len(orders)):
+            o = orders[i]
+            if i >= len(results):
+                failed.append((o, "OKX returned fewer results than orders", "no_result"))
+                log.error("Order %s: no result from OKX (got %d results for %d orders)", o.get("instId"), len(results), len(orders))
+                continue
+            r = results[i]
+            s_code = r.get("sCode", "0")
+            if s_code != "0":
+                failed.append((o, r.get("sMsg", ""), s_code))
+
+        max_retries = 5
+        for retry_round in range(max_retries):
+            if not failed:
+                break
+            if retry_round > 0:
+                time.sleep(0.3)
+            log.warning("Batch entry: %d failed, retry %d/%d", len(failed), retry_round + 1, max_retries)
+            still_failed = []
+            for order, msg, code in failed:
+                try:
+                    r = self.okx.place_batch_orders([order])
+                    if r and len(r) > 0 and r[0].get("sCode") == "0":
+                        log.info("Retry OK: %s", order.get("instId"))
+                    else:
+                        err_msg = r[0].get("sMsg", msg) if r and len(r) > 0 else msg
+                        err_code = r[0].get("sCode", code) if r and len(r) > 0 else code
+                        still_failed.append((order, err_msg, err_code))
+                        log.error("Retry failed %s: sCode=%s %s", order.get("instId"), err_code, err_msg)
+                except Exception as e:
+                    still_failed.append((order, str(e), "exception"))
+                    log.exception("Retry exception for %s: %s", order.get("instId"), e)
+            failed = still_failed
+
+        ok_count = len(orders) - len(failed)
+        log.info("Batch entry: %d OK, %d failed (after retries)", ok_count, len(failed))
+
+        if self.log_event:
+            failed_detail = [(o.get("instId"), str(c), m) for o, m, c in failed]
+            details = {
+                "total": len(orders),
+                "ok": ok_count,
+                "failed": len(failed),
+                "failed_symbols": [o.get("instId") for o, _, _ in failed],
+                "failed_codes": failed_detail,
+            }
+            s_codes = [c for _, c, _ in failed_detail if c not in ("exception", "no_result")]
+            if s_codes:
+                details["okx_scodes"] = list(dict.fromkeys(s_codes))
+            self.log_event(
+                "trade" if len(failed) == 0 else "warning",
+                f"Batch entry: {ok_count}/{len(orders)} OK" + (f", {len(failed)} failed" if failed else ""),
+                details,
+            )
+
+        if failed:
+            log.warning("Entry ABORT: partial position rejected — rolling back %d opened positions", ok_count)
+            if self.log_event:
+                self.log_event(
+                    "warning",
+                    f"Вход отменён: {len(failed)} ордеров не прошли. Откат {ok_count} открытых позиций.",
+                    {"rollback_count": ok_count, "failed_symbols": [o.get("instId") for o, _, _ in failed]},
+                )
+            try:
+                self._execute_close()
+            except Exception as e:
+                log.exception("Rollback failed — partial positions may remain open: %s", e)
+                if self.log_event:
+                    self.log_event("error", f"Откат не удался: {e}. Проверьте позиции на бирже вручную.", {})
+            raise RuntimeError(
+                f"Entry aborted: {len(failed)}/8 orders failed. Rolled back. Failed: {[o.get('instId') for o, _, _ in failed]}"
+            )
+
+        self._update_positions_from_exchange()
+
+    def _execute_close(self) -> None:
+        positions = self.okx.get_positions()
+        # Закрываем все USDT-SWAP (не только our_symbols), иначе «хвосты» при смене конфига или DCA
+        our_symbols = set(self.sc.all_symbols) | set(self.state.positions.keys())
+        orders = []
+        EPS = 1e-10
+        for pos in positions:
+            inst_id = pos.get("instId", "")
+            if inst_id.endswith("-USDT-SWAP") or inst_id in our_symbols:
+                pass  # включаем
+            else:
+                continue
+            pos_raw = pos.get("pos", "0")
+            try:
+                qty = float(pos_raw)
+            except (TypeError, ValueError):
+                continue
+            if qty == 0:
+                continue
+            side = "sell" if qty > 0 else "buy"
+            # Используем сырую строку pos с биржи — без float→str, иначе теряется точность
+            sz = pos_raw.strip() if isinstance(pos_raw, str) else self._format_sz_contract(qty)
+            orders.append({
+                "instId": inst_id, "tdMode": "cross",
+                "side": side, "ordType": "market",
+                "sz": sz,
+                "reduceOnly": True,
+            })
+            log.debug("Close order: instId=%s pos_raw=%s sz=%s", inst_id, pos_raw, sz)
+
+        if not orders:
+            log.info("No open positions to close on exchange")
+            return
+
+        results = self.okx.place_batch_orders(orders)
+        failed_orders = []
+        for i, r in enumerate(results):
+            s_code = r.get("sCode", "0")
+            if s_code != "0":
+                failed_orders.append((orders[i], r.get("sMsg", ""), s_code, r.get("instId", "?")))
+                log.error("Close failed instId=%s sCode=%s %s", r.get("instId"), s_code, r.get("sMsg", ""))
+            else:
+                log.info("Close order OK: instId=%s ordId=%s", r.get("instId", "?"), r.get("ordId", "?"))
+
+        if failed_orders:
+            log.warning("Retrying %d failed close orders one-by-one", len(failed_orders))
+            for order, msg, code, inst_id in failed_orders:
+                try:
+                    time.sleep(0.6)
+                    rr = self.okx.place_batch_orders([order])
+                    if rr and rr[0].get("sCode") == "0":
+                        log.info("Retry close OK: %s", inst_id)
+                    else:
+                        log.error("Retry close failed %s: %s", inst_id, msg)
+                except Exception as e:
+                    log.exception("Retry close exception %s: %s", inst_id, e)
+
+        log.info("Batch close: %d orders sent, %d failed", len(results), len(failed_orders))
+
+        time.sleep(2)
+        remaining = self.okx.get_positions()
+        still_open = [
+            p for p in remaining
+            if (p["instId"] in our_symbols or p["instId"].endswith("-USDT-SWAP"))
+            and abs(float(p.get("pos", 0) or 0)) > EPS
+        ]
+        if still_open:
+            syms = [p["instId"] for p in still_open]
+            log.warning("Positions still open after close attempt: %s — retrying one-by-one", syms)
+            for pos in still_open:
+                pos_raw = pos.get("pos", "0")
+                try:
+                    qty = float(pos_raw)
+                except (TypeError, ValueError):
+                    continue
+                sz = pos_raw.strip() if isinstance(pos_raw, str) else self._format_sz_contract(qty)
+                side = "sell" if qty > 0 else "buy"
+                ro = {"instId": pos["instId"], "tdMode": "cross", "side": side, "ordType": "market", "sz": sz, "reduceOnly": True}
+                try:
+                    time.sleep(0.6)
+                    rr = self.okx.place_batch_orders([ro])
+                    if rr and rr[0].get("sCode") == "0":
+                        log.info("Retry close OK: %s", pos["instId"])
+                    else:
+                        log.error("Retry close failed %s: %s", pos["instId"], rr[0].get("sMsg", "") if rr else "no response")
+                except Exception as e:
+                    log.exception("Retry close exception %s: %s", pos["instId"], e)
+            time.sleep(3)  # дать время на догон заполнений
+            final = self.okx.get_positions()
+            still_open_final = [
+                p for p in final
+                if (p["instId"] in our_symbols or p["instId"].endswith("-USDT-SWAP"))
+                and abs(float(p.get("pos", 0) or 0)) > EPS
+            ]
+            if still_open_final:
+                syms_final = [p["instId"] for p in still_open_final]
+                raise RuntimeError(f"Failed to close positions after retry: {syms_final}")
+
+    def _update_positions_from_exchange(self) -> None:
+        positions = self.okx.get_positions()
+        self.state.positions = {}
+        for pos in positions:
+            qty = float(pos.get("pos", 0))
+            if qty == 0:
+                continue
+            self.state.positions[pos["instId"]] = {
+                "side": "long" if qty > 0 else "short",
+                "qty": abs(qty),
+                "avg_price": float(pos.get("avgPx", 0)),
+                "upl": float(pos.get("upl", 0)),
+            }
+
+    def sync_with_exchange(self) -> None:
+        self._update_positions_from_exchange()
+        log.info("Positions synced with exchange: %d", len(self.state.positions))

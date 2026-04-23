@@ -22,10 +22,6 @@ log = logging.getLogger("manager")
 WORKER_LOGS_DIR = Path(__file__).resolve().parent / "logs"
 WORKER_LOGS_DIR.mkdir(exist_ok=True)
 BACK_ROOT = Path(__file__).resolve().parent.parent
-REPO_ROOT = BACK_ROOT.parent
-LEGACY_BOT_MANAGER_ROOT = REPO_ROOT / "bot_manager"
-LEGACY_WORKER_SCRIPT = LEGACY_BOT_MANAGER_ROOT / "bot_worker.py"
-LEGACY_PYTHON_BIN = LEGACY_BOT_MANAGER_ROOT / "env" / "bin" / "python"
 
 
 class BotManager:
@@ -150,20 +146,12 @@ class BotManager:
             raise ValueError(f"Конфиг бота не найден для user_id={user_id}")
         log_path = WORKER_LOGS_DIR / f"worker_{user_id}.log"
         log_file = open(log_path, "a", buffering=1)
-        # Use the production-proven trading worker to keep live spread/stop behavior stable.
-        if LEGACY_WORKER_SCRIPT.exists():
-            python_bin = str(LEGACY_PYTHON_BIN) if LEGACY_PYTHON_BIN.exists() else Config.PYTHON_BIN
-            cmd = [python_bin, str(LEGACY_WORKER_SCRIPT), "--user-id", str(user_id)]
-            cwd = str(LEGACY_BOT_MANAGER_ROOT)
-        else:
-            cmd = [sys.executable, "-m", "bot_runtime.bot_worker", "--user-id", str(user_id)]
-            cwd = str(BACK_ROOT)
-
+        cmd = [sys.executable, "-m", "bot_runtime.bot_worker", "--user-id", str(user_id)]
         process = subprocess.Popen(
             cmd,
             stdout=log_file,
             stderr=log_file,
-            cwd=cwd,
+            cwd=str(BACK_ROOT),
         )
         self.workers[user_id] = WorkerInfo(process=process, user_id=user_id, log_file=log_file)
         self.db.execute(Q.SET_DESIRED_STATE, ("running", user_id))
