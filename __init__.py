@@ -11,11 +11,18 @@ def create_app() -> Flask:
     app = Flask(__name__)
     app.config["SECRET_KEY"] = Config.SECRET_KEY
 
-    CORS(
-        app,
-        resources={r"/api/*": {"origins": Config.FRONTEND_ORIGIN}},
-        supports_credentials=True,
-    )
+    if Config.CORS_ALLOW_ALL_ORIGINS:
+        CORS(
+            app,
+            resources={r"/api/*": {"origins": "*"}},
+            supports_credentials=True,
+        )
+    else:
+        CORS(
+            app,
+            resources={r"/api/*": {"origins": Config.FRONTEND_ORIGIN}},
+            supports_credentials=True,
+        )
 
     # Blueprints
     app.register_blueprint(auth_bp)

@@ -1,0 +1,809 @@
+Traceback (most recent call last):
+  File "/Users/nickly/Desktop/robot/back/bot_runtime/bot_worker.py", line 9, in <module>
+    from .trading.engine import TradingEngine
+ImportError: attempted relative import with no known parent package
+Traceback (most recent call last):
+  File "/Users/nickly/Desktop/robot/back/bot_runtime/bot_worker.py", line 9, in <module>
+    from .trading.engine import TradingEngine
+ImportError: attempted relative import with no known parent package
+Traceback (most recent call last):
+  File "/Users/nickly/Desktop/robot/back/bot_runtime/bot_worker.py", line 9, in <module>
+    from .trading.engine import TradingEngine
+ImportError: attempted relative import with no known parent package
+Traceback (most recent call last):
+  File "/Users/nickly/Desktop/robot/back/bot_runtime/bot_worker.py", line 9, in <module>
+    from .trading.engine import TradingEngine
+ImportError: attempted relative import with no known parent package
+Traceback (most recent call last):
+  File "/Users/nickly/Desktop/robot/back/bot_runtime/bot_worker.py", line 9, in <module>
+    from .trading.engine import TradingEngine
+ImportError: attempted relative import with no known parent package
+Traceback (most recent call last):
+  File "/Users/nickly/Desktop/robot/back/bot_runtime/bot_worker.py", line 9, in <module>
+    from .trading.engine import TradingEngine
+ImportError: attempted relative import with no known parent package
+Traceback (most recent call last):
+  File "/Users/nickly/Desktop/robot/back/bot_runtime/bot_worker.py", line 9, in <module>
+    from .trading.engine import TradingEngine
+ImportError: attempted relative import with no known parent package
+Traceback (most recent call last):
+  File "/Users/nickly/Desktop/robot/back/bot_runtime/bot_worker.py", line 9, in <module>
+    from .trading.engine import TradingEngine
+ImportError: attempted relative import with no known parent package
+Traceback (most recent call last):
+  File "/Users/nickly/Desktop/robot/back/bot_runtime/bot_worker.py", line 9, in <module>
+    from .trading.engine import TradingEngine
+ImportError: attempted relative import with no known parent package
+2026-04-20 18:12:33,486 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/public/instruments?instType=SWAP "HTTP/2 200 OK"
+2026-04-20 18:12:33,824 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-position-mode "HTTP/2 200 OK"
+2026-04-20 18:12:34,074 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:12:34,314 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:12:34,556 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:12:34,856 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:12:35,099 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:12:35,341 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:12:35,585 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:12:35,823 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:12:35,872 [worker:okx.websocket.WsPublicAsync] INFO: Connecting to WebSocket...
+2026-04-20 18:12:36,914 [worker:okx.websocket.WebSocketFactory] INFO: WebSocket connection established.
+2026-04-20 18:12:37,264 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=BNB-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:12:37,499 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=LINK-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:12:37,739 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=LTC-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:12:37,978 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=TRX-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:12:38,219 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=XRP-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:12:38,459 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=ADA-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:12:38,699 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=SOL-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:12:38,938 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=ETC-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:12:38,940 [worker:spread] INFO: Reference prices fixed: {'BNB-USDT-SWAP': 622.3, 'LINK-USDT-SWAP': 9.165, 'LTC-USDT-SWAP': 54.76, 'TRX-USDT-SWAP': 0.3275, 'XRP-USDT-SWAP': 1.414, 'ADA-USDT-SWAP': 0.2452, 'SOL-USDT-SWAP': 84.75, 'ETC-USDT-SWAP': 8.337}
+2026-04-20 18:12:39,179 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:12:39,421 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:12:39,719 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:12:39,958 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:12:40,336 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:12:40,576 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:12:40,934 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:12:41,172 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:12:41,457 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:12:41,764 [worker:bot_worker] INFO: SIGTERM received, stopping worker
+2026-04-20 18:12:51,849 [worker:asyncio] ERROR: Task exception was never retrieved
+future: <Task finished name='Task-3' coro=<WsPublicAsync.consume() done, defined at /Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/okx/websocket/WsPublicAsync.py:33> exception=SystemExit(0)>
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/nickly/Desktop/robot/back/bot_runtime/bot_worker.py", line 49, in <module>
+    main()
+    ~~~~^^
+  File "/Users/nickly/Desktop/robot/back/bot_runtime/bot_worker.py", line 38, in main
+    asyncio.run(engine.run())
+    ~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.0_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.0_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.0_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/base_events.py", line 708, in run_until_complete
+    self.run_forever()
+    ~~~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.0_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/base_events.py", line 679, in run_forever
+    self._run_once()
+    ~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.0_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/base_events.py", line 2027, in _run_once
+    handle._run()
+    ~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.0_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/events.py", line 89, in _run
+    self._context.run(self._callback, *self._args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/okx/websocket/WsPublicAsync.py", line 38, in consume
+    self.callback(message)
+    ~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/nickly/Desktop/robot/back/bot_runtime/trading/engine.py", line 115, in _on_tick
+    self._update_db_state("running")
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/Users/nickly/Desktop/robot/back/bot_runtime/trading/engine.py", line 137, in _update_db_state
+    self.okx.ping_ms(),
+    ~~~~~~~~~~~~~~~~^^
+  File "/Users/nickly/Desktop/robot/back/bot_runtime/trading/okx_client.py", line 132, in ping_ms
+    self.account.get_account_balance()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/okx/Account.py", line 23, in get_account_balance
+    return self._request_with_params(GET, ACCOUNT_INFO, params)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/okx/okxclient.py", line 64, in _request_with_params
+    return self._request(method, request_path, params)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/okx/okxclient.py", line 55, in _request
+    response = self.get(request_path, headers=header)
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/httpx/_client.py", line 1053, in get
+    return self.request(
+           ~~~~~~~~~~~~^
+        "GET",
+        ^^^^^^
+    ...<7 lines>...
+        extensions=extensions,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/httpx/_client.py", line 825, in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/httpx/_client.py", line 914, in send
+    response = self._send_handling_auth(
+        request,
+    ...<2 lines>...
+        history=[],
+    )
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/httpx/_client.py", line 942, in _send_handling_auth
+    response = self._send_handling_redirects(
+        request,
+        follow_redirects=follow_redirects,
+        history=history,
+    )
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/httpx/_client.py", line 979, in _send_handling_redirects
+    response = self._send_single_request(request)
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/httpx/_client.py", line 1014, in _send_single_request
+    response = transport.handle_request(request)
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/httpx/_transports/default.py", line 250, in handle_request
+    resp = self._pool.handle_request(req)
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/httpcore/_sync/connection_pool.py", line 256, in handle_request
+    raise exc from None
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/httpcore/_sync/connection_pool.py", line 236, in handle_request
+    response = connection.handle_request(
+        pool_request.request
+    )
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/httpcore/_sync/connection.py", line 103, in handle_request
+    return self._connection.handle_request(request)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/httpcore/_sync/http2.py", line 187, in handle_request
+    raise exc
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/httpcore/_sync/http2.py", line 150, in handle_request
+    status, headers = self._receive_response(
+                      ~~~~~~~~~~~~~~~~~~~~~~^
+        request=request, stream_id=stream_id
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/httpcore/_sync/http2.py", line 294, in _receive_response
+    event = self._receive_stream_event(request, stream_id)
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/httpcore/_sync/http2.py", line 336, in _receive_stream_event
+    self._receive_events(request, stream_id)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/httpcore/_sync/http2.py", line 364, in _receive_events
+    events = self._read_incoming_data(request)
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/httpcore/_sync/http2.py", line 441, in _read_incoming_data
+    data = self._network_stream.read(self.READ_NUM_BYTES, timeout)
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/httpcore/_backends/sync.py", line 128, in read
+    return self._sock.recv(max_bytes)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.0_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/ssl.py", line 1285, in recv
+    return self.read(buflen)
+           ~~~~~~~~~^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.0_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/ssl.py", line 1140, in read
+    return self._sslobj.read(len)
+           ~~~~~~~~~~~~~~~~~^^^^^
+  File "/Users/nickly/Desktop/robot/back/bot_runtime/bot_worker.py", line 28, in on_sigterm
+    sys.exit(0)
+    ~~~~~~~~^^^
+SystemExit: 0
+2026-04-20 18:13:00,997 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/public/instruments?instType=SWAP "HTTP/2 200 OK"
+2026-04-20 18:13:01,521 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-position-mode "HTTP/2 200 OK"
+2026-04-20 18:13:01,794 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:13:02,133 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:13:02,452 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:13:02,802 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:13:03,176 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:13:03,473 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:13:03,781 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:13:04,051 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:13:04,100 [worker:okx.websocket.WsPublicAsync] INFO: Connecting to WebSocket...
+2026-04-20 18:13:05,082 [worker:okx.websocket.WebSocketFactory] INFO: WebSocket connection established.
+2026-04-20 18:13:05,445 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=BNB-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:13:05,679 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=LINK-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:13:05,909 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=LTC-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:13:06,143 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=TRX-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:13:06,379 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=XRP-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:13:06,615 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=ADA-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:13:06,910 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=SOL-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:13:07,143 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=ETC-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:13:07,144 [worker:spread] INFO: Reference prices fixed: {'BNB-USDT-SWAP': 622.3, 'LINK-USDT-SWAP': 9.163, 'LTC-USDT-SWAP': 54.76, 'TRX-USDT-SWAP': 0.3275, 'XRP-USDT-SWAP': 1.413, 'ADA-USDT-SWAP': 0.2453, 'SOL-USDT-SWAP': 84.76, 'ETC-USDT-SWAP': 8.34}
+2026-04-20 18:13:07,380 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:13:07,620 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:13:07,909 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:13:08,214 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:13:08,494 [worker:bot_worker] INFO: SIGTERM received, stopping worker
+2026-04-20 18:13:18,576 [worker:asyncio] ERROR: Task exception was never retrieved
+future: <Task finished name='Task-3' coro=<WsPublicAsync.consume() done, defined at /Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/okx/websocket/WsPublicAsync.py:33> exception=SystemExit(0)>
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/nickly/Desktop/robot/back/bot_runtime/bot_worker.py", line 49, in <module>
+    main()
+    ~~~~^^
+  File "/Users/nickly/Desktop/robot/back/bot_runtime/bot_worker.py", line 38, in main
+    asyncio.run(engine.run())
+    ~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.0_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.0_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.0_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/base_events.py", line 708, in run_until_complete
+    self.run_forever()
+    ~~~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.0_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/base_events.py", line 679, in run_forever
+    self._run_once()
+    ~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.0_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/base_events.py", line 2027, in _run_once
+    handle._run()
+    ~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.0_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/events.py", line 89, in _run
+    self._context.run(self._callback, *self._args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/okx/websocket/WsPublicAsync.py", line 38, in consume
+    self.callback(message)
+    ~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/nickly/Desktop/robot/back/bot_runtime/trading/engine.py", line 115, in _on_tick
+    self._update_db_state("running")
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/Users/nickly/Desktop/robot/back/bot_runtime/trading/engine.py", line 120, in _update_db_state
+    balance = self.okx.get_balance()
+  File "/Users/nickly/Desktop/robot/back/bot_runtime/trading/okx_client.py", line 51, in get_balance
+    r = self.account.get_account_balance()
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/okx/Account.py", line 23, in get_account_balance
+    return self._request_with_params(GET, ACCOUNT_INFO, params)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/okx/okxclient.py", line 64, in _request_with_params
+    return self._request(method, request_path, params)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/okx/okxclient.py", line 55, in _request
+    response = self.get(request_path, headers=header)
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/httpx/_client.py", line 1053, in get
+    return self.request(
+           ~~~~~~~~~~~~^
+        "GET",
+        ^^^^^^
+    ...<7 lines>...
+        extensions=extensions,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/httpx/_client.py", line 825, in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/httpx/_client.py", line 914, in send
+    response = self._send_handling_auth(
+        request,
+    ...<2 lines>...
+        history=[],
+    )
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/httpx/_client.py", line 942, in _send_handling_auth
+    response = self._send_handling_redirects(
+        request,
+        follow_redirects=follow_redirects,
+        history=history,
+    )
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/httpx/_client.py", line 979, in _send_handling_redirects
+    response = self._send_single_request(request)
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/httpx/_client.py", line 1014, in _send_single_request
+    response = transport.handle_request(request)
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/httpx/_transports/default.py", line 250, in handle_request
+    resp = self._pool.handle_request(req)
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/httpcore/_sync/connection_pool.py", line 256, in handle_request
+    raise exc from None
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/httpcore/_sync/connection_pool.py", line 236, in handle_request
+    response = connection.handle_request(
+        pool_request.request
+    )
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/httpcore/_sync/connection.py", line 103, in handle_request
+    return self._connection.handle_request(request)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/httpcore/_sync/http2.py", line 187, in handle_request
+    raise exc
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/httpcore/_sync/http2.py", line 150, in handle_request
+    status, headers = self._receive_response(
+                      ~~~~~~~~~~~~~~~~~~~~~~^
+        request=request, stream_id=stream_id
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/httpcore/_sync/http2.py", line 294, in _receive_response
+    event = self._receive_stream_event(request, stream_id)
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/httpcore/_sync/http2.py", line 336, in _receive_stream_event
+    self._receive_events(request, stream_id)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/httpcore/_sync/http2.py", line 364, in _receive_events
+    events = self._read_incoming_data(request)
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/httpcore/_sync/http2.py", line 441, in _read_incoming_data
+    data = self._network_stream.read(self.READ_NUM_BYTES, timeout)
+  File "/Users/nickly/Desktop/robot/back/env/lib/python3.13/site-packages/httpcore/_backends/sync.py", line 128, in read
+    return self._sock.recv(max_bytes)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.0_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/ssl.py", line 1285, in recv
+    return self.read(buflen)
+           ~~~~~~~~~^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.0_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/ssl.py", line 1140, in read
+    return self._sslobj.read(len)
+           ~~~~~~~~~~~~~~~~~^^^^^
+  File "/Users/nickly/Desktop/robot/back/bot_runtime/bot_worker.py", line 28, in on_sigterm
+    sys.exit(0)
+    ~~~~~~~~^^^
+SystemExit: 0
+2026-04-20 18:14:26,820 [worker:bot_worker] INFO: Starting worker for user_id=4
+2026-04-20 18:14:28,564 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/public/instruments?instType=SWAP "HTTP/2 200 OK"
+2026-04-20 18:14:28,583 [worker:okx_client] INFO: Loaded 290 USDT-SWAP instruments
+2026-04-20 18:14:30,383 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-position-mode "HTTP/2 200 OK"
+2026-04-20 18:14:30,384 [worker:okx_client] INFO: set_position_mode: {'code': '0', 'data': [{'posMode': 'net_mode'}], 'msg': ''}
+2026-04-20 18:14:31,092 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:14:31,787 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:14:32,460 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:14:33,284 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:14:34,038 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:14:34,884 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:14:35,680 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:14:36,421 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:14:36,470 [worker:engine] INFO: Restored reference prices from DB
+2026-04-20 18:14:36,471 [worker:engine] INFO: Config: entry=1.00%, TP=0.80%, SL=0.20% (enabled=0)
+2026-04-20 18:14:36,520 [worker:okx.websocket.WsPublicAsync] INFO: Connecting to WebSocket...
+2026-04-20 18:14:36,597 [worker:bot_worker] INFO: SIGTERM received — saving state and exiting
+2026-04-20 18:14:36,705 [worker:engine] INFO: State saved for user_id=4
+2026-04-20 18:16:30,299 [worker:bot_worker] INFO: Starting worker for user_id=4
+2026-04-20 18:16:31,427 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/public/instruments?instType=SWAP "HTTP/2 200 OK"
+2026-04-20 18:16:31,435 [worker:okx_client] INFO: Loaded 290 USDT-SWAP instruments
+2026-04-20 18:16:31,794 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-position-mode "HTTP/2 200 OK"
+2026-04-20 18:16:31,795 [worker:okx_client] INFO: set_position_mode: {'code': '0', 'data': [{'posMode': 'net_mode'}], 'msg': ''}
+2026-04-20 18:16:32,036 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:16:32,345 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:16:32,585 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:16:32,905 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:16:33,149 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:16:33,472 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:16:33,777 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:16:34,023 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:16:34,069 [worker:engine] INFO: Restored reference prices from DB
+2026-04-20 18:16:34,070 [worker:engine] INFO: Config: entry=1.00%, TP=0.80%, SL=0.20% (enabled=0)
+2026-04-20 18:16:34,246 [worker:okx.websocket.WsPublicAsync] INFO: Connecting to WebSocket...
+2026-04-20 18:16:35,242 [worker:okx.websocket.WebSocketFactory] INFO: WebSocket connection established.
+2026-04-20 18:16:35,242 [worker:okx_client] INFO: Subscribed to tickers: ['BNB-USDT-SWAP', 'LINK-USDT-SWAP', 'LTC-USDT-SWAP', 'TRX-USDT-SWAP', 'XRP-USDT-SWAP', 'ADA-USDT-SWAP', 'SOL-USDT-SWAP', 'ETC-USDT-SWAP']
+2026-04-20 18:16:35,605 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=BNB-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:16:35,847 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=LINK-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:16:36,087 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=LTC-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:16:36,329 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=TRX-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:16:36,571 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=XRP-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:16:36,812 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=ADA-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:16:37,057 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=SOL-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:16:37,294 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=ETC-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:16:37,597 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:16:37,839 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:16:38,128 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:16:38,445 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:16:38,500 [worker:engine] INFO: First tick: BNB-USDT-SWAP = 622.3
+2026-04-20 18:16:40,149 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:16:40,465 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:16:42,167 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:16:42,402 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:16:44,179 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:16:44,417 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:16:46,294 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:16:46,616 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:16:48,308 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:16:48,552 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:16:48,791 [worker:bot_worker] INFO: SIGTERM received — saving state and exiting
+2026-04-20 18:16:48,895 [worker:engine] INFO: State saved for user_id=4
+2026-04-20 18:18:09,349 [worker:bot_worker] INFO: Starting worker for user_id=4
+2026-04-20 18:18:10,336 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/public/instruments?instType=SWAP "HTTP/2 200 OK"
+2026-04-20 18:18:10,345 [worker:okx_client] INFO: Loaded 290 USDT-SWAP instruments
+2026-04-20 18:18:10,792 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-position-mode "HTTP/2 200 OK"
+2026-04-20 18:18:10,793 [worker:okx_client] INFO: set_position_mode: {'code': '0', 'data': [{'posMode': 'net_mode'}], 'msg': ''}
+2026-04-20 18:18:11,040 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:18:11,358 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:18:11,601 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:18:11,915 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:18:12,243 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:18:12,559 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:18:12,802 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:18:13,049 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:18:13,098 [worker:engine] INFO: Restored reference prices from DB
+2026-04-20 18:18:13,098 [worker:engine] INFO: Config: entry=1.00%, TP=0.80%, SL=0.20% (enabled=0)
+2026-04-20 18:18:13,160 [worker:okx.websocket.WsPublicAsync] INFO: Connecting to WebSocket...
+2026-04-20 18:18:14,182 [worker:okx.websocket.WebSocketFactory] INFO: WebSocket connection established.
+2026-04-20 18:18:14,183 [worker:okx_client] INFO: Subscribed to tickers: ['BNB-USDT-SWAP', 'LINK-USDT-SWAP', 'LTC-USDT-SWAP', 'TRX-USDT-SWAP', 'XRP-USDT-SWAP', 'ADA-USDT-SWAP', 'SOL-USDT-SWAP', 'ETC-USDT-SWAP']
+2026-04-20 18:18:14,592 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=BNB-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:18:14,830 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=LINK-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:18:15,074 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=LTC-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:18:15,308 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=TRX-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:18:15,542 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=XRP-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:18:15,776 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=ADA-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:18:16,077 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=SOL-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:18:16,314 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=ETC-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:18:16,621 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:16,865 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:17,156 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:17,462 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:17,502 [worker:engine] INFO: First tick: BNB-USDT-SWAP = 623.1
+2026-04-20 18:18:19,166 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:19,409 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:21,174 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:21,470 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:23,242 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:23,484 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:25,382 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:25,621 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:27,346 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:27,592 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:29,414 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:29,651 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:31,452 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:31,696 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:33,544 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:33,853 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:35,562 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:35,801 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:37,596 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:37,891 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:39,606 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:39,845 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:41,674 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:41,916 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:43,667 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:43,980 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:45,762 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:46,080 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:47,777 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:48,094 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:49,805 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:50,045 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:51,788 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:52,027 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:53,902 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:54,141 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:55,902 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:56,147 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:57,903 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:58,142 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:18:59,964 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:00,269 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:02,110 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:02,351 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:04,157 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:04,396 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:06,095 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:06,405 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:08,097 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:08,337 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:10,176 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:10,415 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:12,151 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:12,442 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:14,168 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:14,476 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:16,266 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:16,505 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:18,289 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:18,545 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:20,209 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:20,447 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:22,236 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:22,490 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:24,332 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:24,599 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:26,322 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:26,646 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:28,309 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:28,642 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:30,449 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:30,693 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:32,554 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:32,804 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:34,482 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:34,798 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:36,511 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:36,775 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:38,612 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:38,942 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:40,556 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:40,918 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:42,579 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:42,925 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:44,626 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:44,916 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:46,663 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:47,014 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:48,671 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:48,930 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:50,673 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:50,930 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:52,670 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:52,994 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:54,732 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:54,992 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:56,835 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:57,109 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:58,893 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:19:59,169 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:00,888 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:01,162 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:02,946 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:03,226 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:04,943 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:05,222 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:07,044 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:07,306 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:09,001 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:09,283 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:11,040 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:11,382 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:13,094 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:13,396 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:15,106 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:15,413 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:17,067 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:17,309 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:19,146 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:19,463 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:21,168 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:21,486 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:23,184 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:23,426 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:25,197 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:25,435 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:27,252 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:27,495 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:29,257 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:29,501 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:31,355 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:31,687 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:33,391 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:33,643 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:35,330 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:35,590 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:37,401 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:37,658 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:39,529 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:39,961 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:41,589 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:41,832 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:43,596 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:43,912 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:45,672 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:45,980 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:47,617 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:47,947 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:49,713 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:49,961 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:51,806 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:52,056 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:53,814 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:54,076 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:55,812 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:56,060 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:57,871 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:58,188 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:20:59,908 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:21:00,213 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:21:02,010 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:21:02,258 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:21:04,010 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:21:04,099 [worker:bot_worker] INFO: SIGTERM received — saving state and exiting
+2026-04-20 18:21:04,209 [worker:engine] INFO: State saved for user_id=4
+2026-04-20 18:21:14,238 [worker:asyncio] ERROR: Task exception was never retrieved
+future: <Task finished name='Task-3' coro=<WsPublicAsync.consume() done, defined at /Users/nickly/Desktop/robot/bot_manager/env/lib/python3.13/site-packages/okx/websocket/WsPublicAsync.py:33> exception=SystemExit(0)>
+Traceback (most recent call last):
+  File "/Users/nickly/Desktop/robot/bot_manager/bot_worker.py", line 76, in <module>
+    main()
+    ~~~~^^
+  File "/Users/nickly/Desktop/robot/bot_manager/bot_worker.py", line 64, in main
+    asyncio.run(engine.run())
+    ~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.0_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.0_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.0_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/base_events.py", line 708, in run_until_complete
+    self.run_forever()
+    ~~~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.0_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/base_events.py", line 679, in run_forever
+    self._run_once()
+    ~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.0_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/base_events.py", line 2027, in _run_once
+    handle._run()
+    ~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.0_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/events.py", line 89, in _run
+    self._context.run(self._callback, *self._args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/nickly/Desktop/robot/bot_manager/env/lib/python3.13/site-packages/okx/websocket/WsPublicAsync.py", line 38, in consume
+    self.callback(message)
+    ~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/nickly/Desktop/robot/bot_manager/trading/engine.py", line 293, in _on_tick
+    self._update_db_state("running")
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/Users/nickly/Desktop/robot/bot_manager/trading/engine.py", line 359, in _update_db_state
+    ping = self.okx.ping_ms()
+  File "/Users/nickly/Desktop/robot/bot_manager/trading/okx_client.py", line 419, in ping_ms
+    self.account.get_account_balance()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/nickly/Desktop/robot/bot_manager/env/lib/python3.13/site-packages/okx/Account.py", line 23, in get_account_balance
+    return self._request_with_params(GET, ACCOUNT_INFO, params)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/nickly/Desktop/robot/bot_manager/env/lib/python3.13/site-packages/okx/okxclient.py", line 64, in _request_with_params
+    return self._request(method, request_path, params)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/nickly/Desktop/robot/bot_manager/env/lib/python3.13/site-packages/okx/okxclient.py", line 55, in _request
+    response = self.get(request_path, headers=header)
+  File "/Users/nickly/Desktop/robot/bot_manager/env/lib/python3.13/site-packages/httpx/_client.py", line 1053, in get
+    return self.request(
+           ~~~~~~~~~~~~^
+        "GET",
+        ^^^^^^
+    ...<7 lines>...
+        extensions=extensions,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/nickly/Desktop/robot/bot_manager/env/lib/python3.13/site-packages/httpx/_client.py", line 825, in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/nickly/Desktop/robot/bot_manager/env/lib/python3.13/site-packages/httpx/_client.py", line 914, in send
+    response = self._send_handling_auth(
+        request,
+    ...<2 lines>...
+        history=[],
+    )
+  File "/Users/nickly/Desktop/robot/bot_manager/env/lib/python3.13/site-packages/httpx/_client.py", line 942, in _send_handling_auth
+    response = self._send_handling_redirects(
+        request,
+        follow_redirects=follow_redirects,
+        history=history,
+    )
+  File "/Users/nickly/Desktop/robot/bot_manager/env/lib/python3.13/site-packages/httpx/_client.py", line 979, in _send_handling_redirects
+    response = self._send_single_request(request)
+  File "/Users/nickly/Desktop/robot/bot_manager/env/lib/python3.13/site-packages/httpx/_client.py", line 1014, in _send_single_request
+    response = transport.handle_request(request)
+  File "/Users/nickly/Desktop/robot/bot_manager/env/lib/python3.13/site-packages/httpx/_transports/default.py", line 250, in handle_request
+    resp = self._pool.handle_request(req)
+  File "/Users/nickly/Desktop/robot/bot_manager/env/lib/python3.13/site-packages/httpcore/_sync/connection_pool.py", line 256, in handle_request
+    raise exc from None
+  File "/Users/nickly/Desktop/robot/bot_manager/env/lib/python3.13/site-packages/httpcore/_sync/connection_pool.py", line 236, in handle_request
+    response = connection.handle_request(
+        pool_request.request
+    )
+  File "/Users/nickly/Desktop/robot/bot_manager/env/lib/python3.13/site-packages/httpcore/_sync/connection.py", line 103, in handle_request
+    return self._connection.handle_request(request)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/nickly/Desktop/robot/bot_manager/env/lib/python3.13/site-packages/httpcore/_sync/http2.py", line 187, in handle_request
+    raise exc
+  File "/Users/nickly/Desktop/robot/bot_manager/env/lib/python3.13/site-packages/httpcore/_sync/http2.py", line 150, in handle_request
+    status, headers = self._receive_response(
+                      ~~~~~~~~~~~~~~~~~~~~~~^
+        request=request, stream_id=stream_id
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/nickly/Desktop/robot/bot_manager/env/lib/python3.13/site-packages/httpcore/_sync/http2.py", line 294, in _receive_response
+    event = self._receive_stream_event(request, stream_id)
+  File "/Users/nickly/Desktop/robot/bot_manager/env/lib/python3.13/site-packages/httpcore/_sync/http2.py", line 336, in _receive_stream_event
+    self._receive_events(request, stream_id)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/Users/nickly/Desktop/robot/bot_manager/env/lib/python3.13/site-packages/httpcore/_sync/http2.py", line 364, in _receive_events
+    events = self._read_incoming_data(request)
+  File "/Users/nickly/Desktop/robot/bot_manager/env/lib/python3.13/site-packages/httpcore/_sync/http2.py", line 441, in _read_incoming_data
+    data = self._network_stream.read(self.READ_NUM_BYTES, timeout)
+  File "/Users/nickly/Desktop/robot/bot_manager/env/lib/python3.13/site-packages/httpcore/_backends/sync.py", line 128, in read
+    return self._sock.recv(max_bytes)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.0_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/ssl.py", line 1285, in recv
+    return self.read(buflen)
+           ~~~~~~~~~^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.0_1/Frameworks/Python.framework/Versions/3.13/lib/python3.13/ssl.py", line 1140, in read
+    return self._sslobj.read(len)
+           ~~~~~~~~~~~~~~~~~^^^^^
+  File "/Users/nickly/Desktop/robot/bot_manager/bot_worker.py", line 51, in on_sigterm
+    sys.exit(0)
+    ~~~~~~~~^^^
+SystemExit: 0
+2026-04-20 18:25:36,420 [worker:bot_worker] INFO: Starting worker for user_id=4
+2026-04-20 18:25:37,571 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/public/instruments?instType=SWAP "HTTP/2 200 OK"
+2026-04-20 18:25:37,579 [worker:okx_client] INFO: Loaded 290 USDT-SWAP instruments
+2026-04-20 18:25:37,928 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-position-mode "HTTP/2 200 OK"
+2026-04-20 18:25:37,928 [worker:okx_client] INFO: set_position_mode: {'code': '0', 'data': [{'posMode': 'net_mode'}], 'msg': ''}
+2026-04-20 18:25:38,180 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:25:38,432 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:25:38,682 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:25:38,944 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:25:39,223 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:25:39,481 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:25:39,734 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:25:39,984 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:25:40,025 [worker:engine] INFO: Restored reference prices from DB
+2026-04-20 18:25:40,026 [worker:engine] INFO: Config: entry=1.00%, TP=0.80%, SL=0.20% (enabled=0)
+2026-04-20 18:25:40,074 [worker:okx.websocket.WsPublicAsync] INFO: Connecting to WebSocket...
+2026-04-20 18:25:41,242 [worker:okx.websocket.WebSocketFactory] INFO: WebSocket connection established.
+2026-04-20 18:25:41,242 [worker:okx_client] INFO: Subscribed to tickers: ['BNB-USDT-SWAP', 'LINK-USDT-SWAP', 'LTC-USDT-SWAP', 'TRX-USDT-SWAP', 'XRP-USDT-SWAP', 'ADA-USDT-SWAP', 'SOL-USDT-SWAP', 'ETC-USDT-SWAP']
+2026-04-20 18:25:41,604 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=BNB-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:25:41,837 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=LINK-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:25:42,088 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=LTC-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:25:42,321 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=TRX-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:25:42,560 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=XRP-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:25:42,797 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=ADA-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:25:43,045 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=SOL-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:25:43,290 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=ETC-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:25:43,537 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:25:43,791 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:25:44,083 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:25:44,327 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:25:44,378 [worker:engine] INFO: First tick: BNB-USDT-SWAP = 625.9
+2026-04-20 18:25:46,088 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:25:46,332 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:25:48,092 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:25:48,335 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:25:50,099 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:25:50,346 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:25:52,144 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:25:52,387 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:25:54,204 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:25:54,446 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:25:56,201 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:25:56,445 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:25:58,248 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:25:58,489 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:26:00,351 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:26:00,594 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:26:02,307 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:26:02,551 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:26:04,313 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:26:04,558 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:26:06,303 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:26:06,660 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:26:08,311 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:26:08,563 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:26:10,450 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:26:10,697 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:26:12,502 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:26:12,750 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:26:14,553 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:26:14,800 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:26:16,542 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:26:16,782 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:26:18,551 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:26:18,799 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:26:19,697 [worker:bot_worker] INFO: SIGTERM received — saving state and exiting
+2026-04-20 18:26:19,788 [worker:engine] INFO: State saved for user_id=4
+2026-04-20 18:26:40,873 [worker:bot_worker] INFO: Starting worker for user_id=4
+2026-04-20 18:26:42,716 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/public/instruments?instType=SWAP "HTTP/2 200 OK"
+2026-04-20 18:26:42,739 [worker:okx_client] INFO: Loaded 290 USDT-SWAP instruments
+2026-04-20 18:26:43,083 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-position-mode "HTTP/2 200 OK"
+2026-04-20 18:26:43,084 [worker:okx_client] INFO: set_position_mode: {'code': '0', 'data': [{'posMode': 'net_mode'}], 'msg': ''}
+2026-04-20 18:26:43,345 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:26:43,602 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:26:43,850 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:26:44,097 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:26:44,341 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:26:44,587 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:26:44,835 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:26:45,086 [worker:httpx] INFO: HTTP Request: POST https://www.okx.com/api/v5/account/set-leverage "HTTP/2 200 OK"
+2026-04-20 18:26:45,132 [worker:engine] INFO: Restored reference prices from DB
+2026-04-20 18:26:45,133 [worker:engine] INFO: Config: entry=1.00%, TP=0.80%, SL=0.20% (enabled=0)
+2026-04-20 18:26:45,177 [worker:okx.websocket.WsPublicAsync] INFO: Connecting to WebSocket...
+2026-04-20 18:26:46,263 [worker:okx.websocket.WebSocketFactory] INFO: WebSocket connection established.
+2026-04-20 18:26:46,264 [worker:okx_client] INFO: Subscribed to tickers: ['BNB-USDT-SWAP', 'LINK-USDT-SWAP', 'LTC-USDT-SWAP', 'TRX-USDT-SWAP', 'XRP-USDT-SWAP', 'ADA-USDT-SWAP', 'SOL-USDT-SWAP', 'ETC-USDT-SWAP']
+2026-04-20 18:26:46,602 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=BNB-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:26:46,846 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=LINK-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:26:47,084 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=LTC-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:26:47,329 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=TRX-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:26:47,574 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=XRP-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:26:47,817 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=ADA-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:26:48,103 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=SOL-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:26:48,341 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/market/ticker?instId=ETC-USDT-SWAP "HTTP/2 200 OK"
+2026-04-20 18:26:48,591 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:26:48,911 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:26:49,209 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:26:49,451 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:26:49,510 [worker:engine] INFO: First tick: LTC-USDT-SWAP = 55.03
+2026-04-20 18:26:51,213 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:26:51,457 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:26:53,338 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:26:53,575 [worker:httpx] INFO: HTTP Request: GET https://www.okx.com/api/v5/account/balance "HTTP/2 200 OK"
+2026-04-20 18:26:53,985 [worker:bot_worker] INFO: SIGTERM received — saving state and exiting
+2026-04-20 18:26:54,098 [worker:engine] INFO: State saved for user_id=4

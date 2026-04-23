@@ -13,6 +13,7 @@ import requests
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
+from bot_gateway import build_bot_gateway
 from config import Config
 from db import execute, query_all, query_one
 
@@ -76,31 +77,56 @@ def _format_subscription(user: dict) -> Dict[str, Any]:
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = Config.SECRET_KEY
+bot_gateway = build_bot_gateway()
 
-ALLOWED_CORS_ORIGINS = {
-    "http://localhost:3000",
-    "https://nickly24-crypto-front-a2d6.twc1.net",
-}
-
-CORS(
-    app,
-    resources={r"/api/*": {"origins": list(ALLOWED_CORS_ORIGINS)}},
-    supports_credentials=True,
+_BASE_CORS_ORIGINS = frozenset(
+    {
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "https://nickly24-crypto-front-a2d6.twc1.net",
+    }
 )
+
+
+def _resolved_cors_origins() -> frozenset[str]:
+    s = set(_BASE_CORS_ORIGINS)
+    fo = (Config.FRONTEND_ORIGIN or "").strip()
+    if fo:
+        s.add(fo)
+    return frozenset(s)
+
+
+if Config.CORS_ALLOW_ALL_ORIGINS:
+    CORS(
+        app,
+        resources={r"/api/*": {"origins": "*"}},
+        supports_credentials=True,
+    )
+    ALLOWED_CORS_ORIGINS: frozenset[str] | None = None
+else:
+    ALLOWED_CORS_ORIGINS = _resolved_cors_origins()
+    CORS(
+        app,
+        resources={r"/api/*": {"origins": list(ALLOWED_CORS_ORIGINS)}},
+        supports_credentials=True,
+    )
 
 
 @app.after_request
 def add_cors_headers(response):
     origin = request.headers.get("Origin")
-    if origin in ALLOWED_CORS_ORIGINS:
+    if Config.CORS_ALLOW_ALL_ORIGINS:
+        allow_origin = origin or "*"
+    elif origin and ALLOWED_CORS_ORIGINS is not None and origin in ALLOWED_CORS_ORIGINS:
         allow_origin = origin
     else:
-        allow_origin = Config.FRONTEND_ORIGIN or origin or "*"
+        allow_origin = (Config.FRONTEND_ORIGIN or "").strip() or "*"
     response.headers.setdefault("Access-Control-Allow-Origin", allow_origin)
     response.headers.setdefault("Vary", "Origin")
     response.headers.setdefault("Access-Control-Allow-Headers", "Content-Type, Authorization")
     response.headers.setdefault("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
-    response.headers.setdefault("Access-Control-Allow-Credentials", "true")
+    if allow_origin != "*":
+        response.headers.setdefault("Access-Control-Allow-Credentials", "true")
     return response
 
 
@@ -460,13 +486,6 @@ def sync_after_payment():
 # ---------------------------------------------------------------------------
 
 
-def _manager_headers() -> Dict[str, str]:
-    return {
-        "X-Manager-Key": Config.MANAGER_API_KEY,
-        "Content-Type": "application/json",
-    }
-
-
 def _require_auth_user() -> dict | None:
     payload = _parse_auth()
     if not payload:
@@ -488,13 +507,12 @@ def bot_status():
         return error
     user_id = int(user["sub"])
 
-    url = f"{Config.MANAGER_URL}/api/workers/{user_id}"
     try:
-        resp = requests.get(url, headers=_manager_headers(), timeout=3)
+        payload, status = bot_gateway.status(user_id)
     except Exception as e:
         return _err(f"Manager unavailable: {e}", 503)
 
-    response = jsonify(resp.json()), resp.status_code
+    response = jsonify(payload), status
     response[0].headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
     response[0].headers["Pragma"] = "no-cache"
     return response
@@ -507,14 +525,12 @@ def bot_start():
         return error
     user_id = int(user["sub"])
 
-    url = f"{Config.MANAGER_URL}/api/workers/{user_id}/start"
     try:
-        resp = requests.post(url, headers=_manager_headers(), timeout=5)
+        payload, status = bot_gateway.start(user_id)
     except Exception as e:
         return _err(f"Manager unavailable: {e}", 503)
-
-    if resp.status_code != 200:
-        return jsonify(resp.json()), resp.status_code
+    if status != 200:
+        return jsonify(payload), status
 
     row = _poll_db(
         "SELECT actual_state FROM bot_state WHERE user_id = %s",
@@ -534,24 +550,21 @@ def bot_stop():
         return error
     user_id = int(user["sub"])
 
-    url = f"{Config.MANAGER_URL}/api/workers/{user_id}/stop"
     try:
-        resp = requests.post(url, headers=_manager_headers(), timeout=5)
+        payload, status = bot_gateway.stop(user_id)
     except Exception as e:
         return _err(f"Manager unavailable: {e}", 503)
-
-    if resp.status_code != 200:
-        return jsonify(resp.json()), resp.status_code
+    if status != 200:
+        return jsonify(payload), status
 
     deadline = time.time() + 5
     stopped = False
     while time.time() < deadline:
         try:
-            check = requests.get(
-                f"{Config.MANAGER_URL}/api/workers/{user_id}",
-                headers=_manager_headers(), timeout=3,
-            )
-            data = check.json()
+            data, status = bot_gateway.status(user_id)
+            if status != 200:
+                stopped = True
+                break
             if not data.get("data", {}).get("alive", True):
                 stopped = True
                 break
@@ -573,14 +586,12 @@ def bot_close_position():
     before = query_one("SELECT position_open FROM bot_state WHERE user_id = %s", (user_id,))
     was_open = before and before.get("position_open") == 1
 
-    url = f"{Config.MANAGER_URL}/api/workers/{user_id}/close-positions"
     try:
-        resp = requests.post(url, headers=_manager_headers(), timeout=10)
+        payload, status = bot_gateway.close_position(user_id)
     except Exception as e:
         return _err(f"Manager unavailable: {e}", 503)
-
-    if resp.status_code != 200:
-        return jsonify(resp.json()), resp.status_code
+    if status != 200:
+        return jsonify(payload), status
 
     if was_open:
         row = _poll_db(
@@ -609,6 +620,29 @@ def bot_close_position():
     return _ok({"status": "no_position", "position_closed": True})
 
 
+@app.post("/api/bot/spread/reset")
+def bot_spread_reset():
+    user, error = _require_auth_user_or_401()
+    if error:
+        return error
+    user_id = int(user["sub"])
+
+    execute(
+        """
+        UPDATE bot_state
+        SET current_spread_pct = 0.0000,
+            reference_prices = NULL,
+            quotes_snapshot = NULL,
+            buy_basket = NULL,
+            sell_basket = NULL,
+            updated_at = NOW()
+        WHERE user_id = %s
+        """,
+        (user_id,),
+    )
+    return _ok({"status": "spread_reset", "current_spread_pct": 0.0})
+
+
 @app.get("/api/bot/logs")
 def bot_logs():
     user, error = _require_auth_user_or_401()
@@ -617,13 +651,11 @@ def bot_logs():
     user_id = int(user["sub"])
 
     limit = request.args.get("limit", 50)
-    url = f"{Config.MANAGER_URL}/api/logs/{user_id}?limit={limit}"
     try:
-        resp = requests.get(url, headers=_manager_headers(), timeout=3)
+        payload, status = bot_gateway.logs(user_id, int(limit))
     except Exception as e:
         return _err(f"Manager unavailable: {e}", 503)
-
-    return jsonify(resp.json()), resp.status_code
+    return jsonify(payload), status
 
 
 # ---------------------------------------------------------------------------
@@ -688,6 +720,17 @@ def get_chart_spread():
         """,
         (user_id, interval_val),
     )
+    if not rows:
+        # Compatibility fallback for environments where spread is written only to spread_log.
+        rows = query_all(
+            f"""
+            SELECT recorded_at AS ts, spread_pct, r_basket1_pct, r_basket2_pct
+            FROM spread_log
+            WHERE user_id = %s AND recorded_at >= {interval_sql}
+            ORDER BY recorded_at ASC
+            """,
+            (user_id, interval_val),
+        )
     points = [
         {
             "ts": r["ts"].isoformat() if hasattr(r["ts"], "isoformat") else str(r["ts"]),
@@ -1435,5 +1478,5 @@ def analytics_trades_detailed():
 
 
 if __name__ == "__main__":
-    # threaded=True — чтобы длинные запросы (close/start с _poll_db) не блокировали status и др.
-    app.run(host="127.0.0.1", port=Config.PORT, debug=True, threaded=True)
+    # Disable reloader in monolith mode: duplicated Flask processes break in-memory worker manager.
+    app.run(host="127.0.0.1", port=Config.PORT, debug=False, use_reloader=False, threaded=True)
