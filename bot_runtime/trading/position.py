@@ -361,6 +361,21 @@ class PositionManager:
         s = f"{abs(val):.16f}".rstrip("0").rstrip(".")
         return s if s else "0"
 
+    def _format_close_sz(self, pos_raw, qty: float) -> str:
+        """
+        OKX returns short positions as negative pos, but close order `sz`
+        must always be positive. Keep string precision from OKX and strip only
+        the sign.
+        """
+        if isinstance(pos_raw, str):
+            raw = pos_raw.strip()
+            if raw.startswith(("-", "+")):
+                raw = raw[1:]
+            if raw.startswith("."):
+                raw = "0" + raw
+            return raw or self._format_sz_contract(qty)
+        return self._format_sz_contract(qty)
+
     def _execute_entry(self, long_basket: str, short_basket: str) -> None:
         required = len(self.sc.all_symbols)
         balance = self.okx.get_balance()
@@ -522,8 +537,9 @@ class PositionManager:
             if qty == 0:
                 continue
             side = "sell" if qty > 0 else "buy"
-            # Используем сырую строку pos с биржи — без float→str, иначе теряется точность
-            sz = pos_raw.strip() if isinstance(pos_raw, str) else self._format_sz_contract(qty)
+            # Используем сырую строку pos с биржи — без float→str, иначе теряется точность.
+            # Для short OKX отдаёт отрицательный pos, но order sz должен быть положительным.
+            sz = self._format_close_sz(pos_raw, qty)
             orders.append({
                 "instId": inst_id, "tdMode": "cross",
                 "side": side, "ordType": "market",
@@ -577,7 +593,7 @@ class PositionManager:
                     qty = float(pos_raw)
                 except (TypeError, ValueError):
                     continue
-                sz = pos_raw.strip() if isinstance(pos_raw, str) else self._format_sz_contract(qty)
+                sz = self._format_close_sz(pos_raw, qty)
                 side = "sell" if qty > 0 else "buy"
                 ro = {"instId": pos["instId"], "tdMode": "cross", "side": side, "ordType": "market", "sz": sz, "reduceOnly": True}
                 try:
@@ -614,6 +630,18 @@ class PositionManager:
                 "upl": float(pos.get("upl", 0)),
             }
 
+    def _mark_position_closed(self) -> None:
+        self.state.is_open = False
+        self.state.long_basket = None
+        self.state.short_basket = None
+        self.state.entry_spread = 0
+        self.state.entry_time = None
+        self.state.dca_count = 0
+        self.state.positions = {}
+
     def sync_with_exchange(self) -> None:
         self._update_positions_from_exchange()
+        if self.state.is_open and not self.state.positions:
+            log.warning("Saved position state is open, but exchange has no open positions; marking closed")
+            self._mark_position_closed()
         log.info("Positions synced with exchange: %d", len(self.state.positions))
