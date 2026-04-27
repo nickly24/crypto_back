@@ -46,6 +46,8 @@ class TradingEngine:
         self._last_spread_log = 0.0
         self._last_instrument_log = 0.0
         self._last_position_sync = 0.0
+        self._ws_started_at = 0.0
+        self._last_tick_at = 0.0
         self._tick_count = 0
         self._config: dict = {}
         self._rest_api_ok = True
@@ -161,6 +163,7 @@ class TradingEngine:
     # ------------------------------------------------------------------
 
     async def run(self) -> None:
+        self._ws_started_at = time.time()
         await self.okx.subscribe_tickers(
             self.sc.all_symbols,
             callback=self._on_tick,
@@ -218,6 +221,7 @@ class TradingEngine:
                         self._close_requested = False
 
                 now = time.time()
+                self._raise_if_ws_stale(now)
                 if now - self._last_state_update >= 3.0:
                     self._update_db_state("running")
                     self._last_state_update = now
@@ -247,6 +251,7 @@ class TradingEngine:
                 return
 
             self._tick_count += 1
+            self._last_tick_at = time.time()
             price = float(last_price)
             self.sc.update_price(inst_id, price)
 
@@ -307,6 +312,26 @@ class TradingEngine:
             except Exception:
                 pass
 
+    def _raise_if_ws_stale(self, now: float | None = None) -> None:
+        timeout = max(10, int(getattr(Config, "WS_STALE_TIMEOUT", 90)))
+        now = now or time.time()
+        last_seen = self._last_tick_at or self._ws_started_at
+        if not last_seen or now - last_seen <= timeout:
+            return
+
+        age = int(now - last_seen)
+        message = (
+            f"OKX WebSocket stale: нет ticker-данных {age}s "
+            f"(limit={timeout}s), worker будет перезапущен"
+        )
+        log.error(message)
+        try:
+            self._log_event("error", message)
+            self._update_db_state("error", connection_status="stale")
+        except Exception:
+            log.exception("Failed to persist stale WebSocket state")
+        raise RuntimeError(message)
+
     def _handle_action(self, action: str | tuple[str, dict]) -> None:
         if isinstance(action, tuple):
             action, snapshot = action
@@ -343,7 +368,7 @@ class TradingEngine:
     # DB writes
     # ------------------------------------------------------------------
 
-    def _update_db_state(self, actual_state: str) -> None:
+    def _update_db_state(self, actual_state: str, connection_status: str = "connected") -> None:
         pnl = self.pm.get_pnl_for_dashboard() if self.pm else {}
         balance: dict = {}
         ping = 0
@@ -387,7 +412,7 @@ class TradingEngine:
             total_eq,
             avail_eq,
             ping,
-            "connected",
+            connection_status,
             int(self.pm.state.is_open) if self.pm else 0,
             round(self.pm.state.entry_spread, 4) if self.pm and self.pm.state.is_open else None,
             self.pm.state.dca_count if self.pm else 0,

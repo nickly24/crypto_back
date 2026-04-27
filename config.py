@@ -61,6 +61,7 @@ class Config:
     HEALTH_CHECK_INTERVAL: int = int(os.getenv("HEALTH_CHECK_INTERVAL", "10"))
     WORKER_HANG_TIMEOUT: int = int(os.getenv("WORKER_HANG_TIMEOUT", "60"))
     WORKER_STOP_TIMEOUT: int = int(os.getenv("WORKER_STOP_TIMEOUT", "15"))
+    WS_STALE_TIMEOUT: int = int(os.getenv("WS_STALE_TIMEOUT", "90"))
     MAX_RESTARTS_PER_WINDOW: int = int(os.getenv("MAX_RESTARTS_PER_WINDOW", "3"))
     RESTART_WINDOW_SECONDS: int = int(os.getenv("RESTART_WINDOW_SECONDS", "300"))
     PYTHON_BIN: str = os.getenv("PYTHON_BIN", "python3")
@@ -69,4 +70,3 @@ class Config:
     YOOKASSA_SHOP_ID: str = os.getenv("YOOKASSA_SHOP_ID", "")
     YOOKASSA_SECRET_KEY: str = os.getenv("YOOKASSA_SECRET_KEY", "")
     YOOKASSA_API_URL: str = "https://api.yookassa.ru/v3"
-
