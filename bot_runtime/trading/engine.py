@@ -17,7 +17,7 @@ import json
 import logging
 import os
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 
 from config import Config
 from crypto.encryption import decrypt
@@ -546,6 +546,18 @@ class TradingEngine:
                 except Exception:
                     pass
 
+        total_commission_usdt = 0.0
+        from_fills = self._pnl_and_commission_from_fills(opened_at, closed_at)
+        if from_fills is not None:
+            pnl_usdt_val, total_commission_usdt = from_fills
+            if total_volume_usdt > 0:
+                actual_pnl_pct = round(100.0 * pnl_usdt_val / total_volume_usdt, 4)
+            log.info(
+                "Trade PnL from OKX fills net: %.4f USDT, commission=%.6f",
+                pnl_usdt_val,
+                total_commission_usdt,
+            )
+
         self.db.execute(Q.INSERT_TRADE, (
             self.user_id,
             opened_at,
@@ -561,8 +573,51 @@ class TradingEngine:
             snapshot.get("dca_count", 0),
             reason,
             json.dumps(snapshot.get("positions", {})),
-            0,
+            total_commission_usdt,
         ))
+
+    def _pnl_and_commission_from_fills(self, opened_at: datetime, closed_at: datetime) -> tuple[float, float] | None:
+        try:
+            begin_ms = self._utc_ms(opened_at) - 60_000
+            end_ms = self._utc_ms(closed_at) + 60_000
+            fills = self.okx.get_fills_history(
+                inst_type="SWAP",
+                begin_ms=begin_ms,
+                end_ms=end_ms,
+                limit=100,
+            )
+        except Exception as exc:
+            log.warning("Could not fetch OKX fills for trade history: %s", exc)
+            return None
+
+        symbols = set(self.sc.all_symbols)
+        gross_pnl = 0.0
+        fee_total = 0.0
+        matched = 0
+        for fill in fills:
+            if fill.get("instId") not in symbols:
+                continue
+            matched += 1
+            try:
+                gross_pnl += float(fill.get("fillPnl") or fill.get("pnl") or 0)
+            except (TypeError, ValueError):
+                pass
+            try:
+                fee_total += float(fill.get("fee") or 0)
+            except (TypeError, ValueError):
+                pass
+
+        if matched == 0:
+            return None
+
+        commission = abs(fee_total)
+        net_pnl = gross_pnl + fee_total
+        return round(net_pnl, 4), round(commission, 6)
+
+    def _utc_ms(self, value: datetime) -> int:
+        if value.tzinfo is None:
+            value = value.replace(tzinfo=timezone.utc)
+        return int(value.timestamp() * 1000)
 
     # ------------------------------------------------------------------
     # Shutdown
