@@ -22,6 +22,7 @@ class Config:
         "BACKEND_SECRET_KEY",
         "dev-backend-secret-change-me",  # для dev; в проде переопределить
     )
+    BACKEND_PUBLIC_URL: str = os.getenv("BACKEND_PUBLIC_URL", "").strip()
 
     # CORS: FRONTEND_ORIGIN — базовый URL фронта (редиректы YooKassa и т.п.)
     FRONTEND_ORIGIN: str = os.getenv("FRONTEND_ORIGIN", "https://nickly24-crypto-front-a2d6.twc1.net/")
@@ -70,3 +71,9 @@ class Config:
     YOOKASSA_SHOP_ID: str = os.getenv("YOOKASSA_SHOP_ID", "")
     YOOKASSA_SECRET_KEY: str = os.getenv("YOOKASSA_SECRET_KEY", "")
     YOOKASSA_API_URL: str = "https://api.yookassa.ru/v3"
+
+    # Social auth
+    GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID", "").strip()
+    TELEGRAM_CLIENT_ID: str = os.getenv("TELEGRAM_CLIENT_ID", "").strip()
+    TELEGRAM_CLIENT_SECRET: str = os.getenv("TELEGRAM_CLIENT_SECRET", "").strip()
+    TELEGRAM_REDIRECT_URI: str = os.getenv("TELEGRAM_REDIRECT_URI", "").strip()

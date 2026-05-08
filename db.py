@@ -63,3 +63,12 @@ def execute(sql: str, params: tuple | None = None) -> int:
     finally:
         conn.close()
 
+
+def insert_id(sql: str, params: tuple | None = None) -> int:
+    conn = get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(sql, params or ())
+            return int(cur.lastrowid)
+    finally:
+        conn.close()

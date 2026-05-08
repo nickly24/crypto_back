@@ -3,19 +3,30 @@ from __future__ import annotations
 import base64
 import datetime as dt
 import json
+import secrets
 import time
 import uuid
+from urllib.parse import urlencode
 from typing import Any, Dict
 
 import bcrypt
 import jwt
 import requests
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, redirect, request
 from flask_cors import CORS
 
 from bot_gateway import build_bot_gateway
 from config import Config
-from db import execute, query_all, query_one
+from db import execute, insert_id, query_all, query_one
+from social_auth import (
+    build_telegram_authorize_url,
+    exchange_telegram_code,
+    generate_nonce,
+    generate_pkce_pair,
+    generate_state,
+    verify_google_id_token,
+    verify_telegram_id_token,
+)
 
 
 def _poll_db(sql: str, params: tuple, check_fn, timeout: float = 15.0, interval: float = 1.0):
@@ -73,6 +84,233 @@ def _format_subscription(user: dict) -> Dict[str, Any]:
         "plan": plan,
         "subscription_ends_at": ends.isoformat() if ends else None,
     }
+
+
+DEFAULT_BASKET_PAIRS: list[tuple[str, str]] = [
+    ("BTC-USDT-SWAP", "ETH-USDT-SWAP"),
+    ("BNB-USDT-SWAP", "XRP-USDT-SWAP"),
+    ("LINK-USDT-SWAP", "DOGE-USDT-SWAP"),
+    ("LTC-USDT-SWAP", "XTZ-USDT-SWAP"),
+    ("TRX-USDT-SWAP", "ETC-USDT-SWAP"),
+]
+
+
+def _build_auth_payload(user: dict) -> Dict[str, Any]:
+    token = _make_token(user)
+    sub = _format_subscription(user)
+    return {
+        "access_token": token,
+        "refresh_token": token,
+        "user": {
+            "id": user["id"],
+            "email": user["email"],
+            "role": user["role"],
+            **sub,
+        },
+    }
+
+
+def _normalize_email(email: str | None) -> str | None:
+    if not email:
+        return None
+    value = email.strip().lower()
+    return value or None
+
+
+def _get_user_by_id(user_id: int) -> dict | None:
+    return query_one(
+        "SELECT id, email, role, is_blocked, plan, subscription_ends_at FROM users WHERE id = %s",
+        (user_id,),
+    )
+
+
+def _get_identity(provider: str, provider_user_id: str) -> dict | None:
+    return query_one(
+        "SELECT user_id FROM user_identities WHERE provider = %s AND provider_user_id = %s",
+        (provider, provider_user_id),
+    )
+
+
+def _make_placeholder_email(provider: str, provider_user_id: str) -> str:
+    return f"{provider}-{provider_user_id}@social.local"
+
+
+def _seed_default_bot_config(user_id: int) -> None:
+    cfg = query_one("SELECT id FROM bot_configs WHERE user_id = %s", (user_id,))
+    if cfg:
+        config_id = int(cfg["id"])
+    else:
+        config_id = insert_id(
+            """
+            INSERT INTO bot_configs (
+                user_id, position_size_pct, orders_per_trade, entry_spread_pct,
+                take_profit_pct, dca_count, dca_step_pct, stop_loss_pct,
+                stop_loss_enabled, leverage, no_new_position, simulation_mode,
+                error_filter_enabled, error_filter_pattern, error_retry_count, desired_state
+            ) VALUES (%s, 200.00, 1, 2.00, 0.80, 3, 3.00, 4.00, 0, 20, 0, 1, 1, 'Please try again', 3, 'stopped')
+            """,
+            (user_id,),
+        )
+
+    existing_pairs = query_one("SELECT id FROM basket_pairs WHERE bot_config_id = %s LIMIT 1", (config_id,))
+    if not existing_pairs:
+        for idx, (basket1, basket2) in enumerate(DEFAULT_BASKET_PAIRS, start=1):
+            execute(
+                """
+                INSERT INTO basket_pairs (bot_config_id, pair_index, symbol_basket1, symbol_basket2)
+                VALUES (%s, %s, %s, %s)
+                """,
+                (config_id, idx, basket1, basket2),
+            )
+
+    execute(
+        """
+        INSERT INTO bot_state (user_id, actual_state, updated_at)
+        VALUES (%s, 'stopped', NOW())
+        ON DUPLICATE KEY UPDATE actual_state = actual_state
+        """,
+        (user_id,),
+    )
+
+
+def _create_user(email: str, password_hash: str, role: str = "user") -> int:
+    return insert_id(
+        "INSERT INTO users (email, password_hash, role) VALUES (%s, %s, %s)",
+        (email, password_hash, role),
+    )
+
+
+def _create_social_user(email: str) -> dict:
+    synthetic_password = bcrypt.hashpw(secrets.token_urlsafe(32).encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+    user_id = _create_user(email, synthetic_password, "user")
+    _seed_default_bot_config(user_id)
+    user = _get_user_by_id(user_id)
+    if not user:
+        raise RuntimeError("Failed to create user")
+    return user
+
+
+def _link_identity(
+    *,
+    user_id: int,
+    provider: str,
+    provider_user_id: str,
+    email: str | None,
+    display_name: str | None,
+    avatar_url: str | None,
+) -> None:
+    execute(
+        """
+        INSERT INTO user_identities (user_id, provider, provider_user_id, email, display_name, avatar_url)
+        VALUES (%s, %s, %s, %s, %s, %s)
+        ON DUPLICATE KEY UPDATE
+            email = VALUES(email),
+            display_name = VALUES(display_name),
+            avatar_url = VALUES(avatar_url),
+            updated_at = NOW()
+        """,
+        (user_id, provider, provider_user_id, email, display_name, avatar_url),
+    )
+
+
+def _resolve_or_create_social_user(
+    *,
+    provider: str,
+    provider_user_id: str,
+    email: str | None,
+    display_name: str | None,
+    avatar_url: str | None,
+) -> tuple[dict | None, str | None]:
+    identity = _get_identity(provider, provider_user_id)
+    if identity:
+        user = _get_user_by_id(int(identity["user_id"]))
+        if not user:
+            return None, "Linked user not found"
+        if user.get("is_blocked"):
+            return None, "User is blocked"
+        _link_identity(
+            user_id=user["id"],
+            provider=provider,
+            provider_user_id=provider_user_id,
+            email=email,
+            display_name=display_name,
+            avatar_url=avatar_url,
+        )
+        return user, None
+
+    normalized_email = _normalize_email(email)
+    if normalized_email:
+        existing_user = query_one(
+            "SELECT id FROM users WHERE email = %s",
+            (normalized_email,),
+        )
+        if existing_user:
+            return None, (
+                "An account with this email already exists. "
+                "Sign in with your password first, then connect this provider safely."
+            )
+
+    user = _create_social_user(normalized_email or _make_placeholder_email(provider, provider_user_id))
+    _link_identity(
+        user_id=user["id"],
+        provider=provider,
+        provider_user_id=provider_user_id,
+        email=normalized_email,
+        display_name=display_name,
+        avatar_url=avatar_url,
+    )
+    return user, None
+
+
+def _create_oauth_state(provider: str, next_path: str | None = None) -> dict:
+    state = generate_state()
+    nonce = generate_nonce()
+    code_verifier, code_challenge = generate_pkce_pair()
+    expires_at = dt.datetime.utcnow() + dt.timedelta(minutes=10)
+    execute(
+        """
+        INSERT INTO oauth_states (provider, state, code_verifier, nonce, next_path, expires_at)
+        VALUES (%s, %s, %s, %s, %s, %s)
+        """,
+        (provider, state, code_verifier, nonce, next_path, expires_at),
+    )
+    return {
+        "state": state,
+        "nonce": nonce,
+        "code_verifier": code_verifier,
+        "code_challenge": code_challenge,
+    }
+
+
+def _consume_oauth_state(provider: str, state: str) -> dict | None:
+    row = query_one(
+        """
+        SELECT state, code_verifier, nonce, next_path, expires_at
+        FROM oauth_states
+        WHERE provider = %s AND state = %s
+        """,
+        (provider, state),
+    )
+    if not row:
+        return None
+    execute("DELETE FROM oauth_states WHERE provider = %s AND state = %s", (provider, state))
+    expires_at = row.get("expires_at")
+    if not expires_at or expires_at < dt.datetime.utcnow():
+        return None
+    return row
+
+
+def _build_frontend_callback_url(*, token: str | None = None, error: str | None = None, next_path: str | None = None) -> str:
+    base = (Config.FRONTEND_ORIGIN or "http://localhost:3000").rstrip("/")
+    callback = base + "/auth/callback"
+    params: dict[str, str] = {}
+    if token:
+        params["token"] = token
+    if error:
+        params["error"] = error
+    if next_path:
+        params["next"] = next_path
+    return callback + (f"#{urlencode(params)}" if params else "")
 
 
 app = Flask(__name__)
@@ -158,20 +396,7 @@ def auth_login():
     if not bcrypt.checkpw(password.encode("utf-8"), stored):
         return _err("Неверный логин или пароль", 401)
 
-    token = _make_token(user)
-    sub = _format_subscription(user)
-    return _ok(
-        {
-            "access_token": token,
-            "refresh_token": token,  # упрощение для dev
-            "user": {
-                "id": user["id"],
-                "email": user["email"],
-                "role": user["role"],
-                **sub,
-            },
-        }
-    )
+    return _ok(_build_auth_payload(user))
 
 
 @app.get("/api/auth/me")
@@ -221,19 +446,101 @@ def admin_login():
     if not bcrypt.checkpw(password.encode("utf-8"), stored):
         return _err("Неверный логин или пароль", 401)
 
+    return _ok(_build_auth_payload(user))
+
+
+@app.post("/api/auth/google")
+def auth_google():
+    body = request.get_json(silent=True) or {}
+    credential = (body.get("credential") or "").strip()
+    if not credential:
+        return _err("Google credential is required", 422)
+
+    try:
+        payload = verify_google_id_token(credential)
+    except Exception as exc:
+        return _err(f"Google sign-in failed: {exc}", 401)
+
+    user, conflict = _resolve_or_create_social_user(
+        provider="google",
+        provider_user_id=str(payload["sub"]),
+        email=_normalize_email(payload.get("email")),
+        display_name=payload.get("name"),
+        avatar_url=payload.get("picture"),
+    )
+    if conflict:
+        return _err(conflict, 409)
+    if not user:
+        return _err("Unable to sign in with Google", 500)
+    return _ok(_build_auth_payload(user))
+
+
+@app.get("/api/auth/telegram/start")
+def auth_telegram_start():
+    next_path = (request.args.get("next") or "/dashboard").strip() or "/dashboard"
+    try:
+        oauth_state = _create_oauth_state("telegram", next_path=next_path)
+        auth_url = build_telegram_authorize_url(
+            oauth_state["state"],
+            oauth_state["nonce"],
+            oauth_state["code_challenge"],
+        )
+    except Exception as exc:
+        return _err(f"Telegram auth is unavailable: {exc}", 503)
+    return _ok({"auth_url": auth_url})
+
+
+@app.get("/api/auth/telegram/callback")
+def auth_telegram_callback():
+    code = (request.args.get("code") or "").strip()
+    state = (request.args.get("state") or "").strip()
+    error = (request.args.get("error") or "").strip()
+    error_description = (request.args.get("error_description") or "").strip()
+
+    if error:
+        return redirect(_build_frontend_callback_url(error=error_description or error))
+    if not code or not state:
+        return redirect(_build_frontend_callback_url(error="Telegram callback is missing code or state"))
+
+    saved_state = _consume_oauth_state("telegram", state)
+    if not saved_state:
+        return redirect(_build_frontend_callback_url(error="Telegram sign-in state expired. Please try again."))
+
+    try:
+        token_payload = exchange_telegram_code(code, saved_state["code_verifier"])
+        id_token = token_payload.get("id_token") or ""
+        if not id_token:
+            raise ValueError("Telegram did not return an ID token")
+        claims = verify_telegram_id_token(id_token, nonce=saved_state.get("nonce"))
+    except Exception as exc:
+        return redirect(_build_frontend_callback_url(error=f"Telegram sign-in failed: {exc}"))
+
+    telegram_id = str(claims.get("sub") or claims.get("id") or "")
+    if not telegram_id:
+        return redirect(_build_frontend_callback_url(error="Telegram token is missing user id"))
+
+    preferred_username = claims.get("preferred_username")
+    display_name = claims.get("name") or preferred_username or "Telegram user"
+    placeholder_email = _make_placeholder_email("telegram", telegram_id)
+
+    user, conflict = _resolve_or_create_social_user(
+        provider="telegram",
+        provider_user_id=telegram_id,
+        email=placeholder_email,
+        display_name=display_name,
+        avatar_url=claims.get("picture"),
+    )
+    if conflict:
+        return redirect(_build_frontend_callback_url(error=conflict))
+    if not user:
+        return redirect(_build_frontend_callback_url(error="Unable to sign in with Telegram"))
+
     token = _make_token(user)
-    sub = _format_subscription(user)
-    return _ok(
-        {
-            "access_token": token,
-            "refresh_token": token,
-            "user": {
-                "id": user["id"],
-                "email": user["email"],
-                "role": user["role"],
-                **sub,
-            },
-        }
+    return redirect(
+        _build_frontend_callback_url(
+            token=token,
+            next_path=saved_state.get("next_path") or "/dashboard",
+        )
     )
 
 
