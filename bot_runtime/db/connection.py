@@ -18,7 +18,7 @@ def get_pool() -> PooledDB:
         _pool = PooledDB(
             creator=pymysql,
             maxconnections=Config.DB_POOL_SIZE,
-            mincached=2,
+            mincached=0,
             maxcached=Config.DB_POOL_SIZE,
             blocking=True,
             host=Config.DB_HOST,
@@ -29,6 +29,9 @@ def get_pool() -> PooledDB:
             charset="utf8mb4",
             cursorclass=pymysql.cursors.DictCursor,
             autocommit=True,
+            connect_timeout=Config.DB_CONNECT_TIMEOUT,
+            read_timeout=Config.DB_READ_TIMEOUT,
+            write_timeout=Config.DB_WRITE_TIMEOUT,
         )
     return _pool
 
@@ -58,4 +61,3 @@ class Database:
                 return cur.lastrowid
         finally:
             conn.close()
-

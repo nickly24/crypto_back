@@ -57,6 +57,10 @@ class Config:
 
     # Bot runtime settings (used by in-process manager + workers)
     DB_POOL_SIZE: int = int(os.getenv("DB_POOL_SIZE", "10"))
+    DB_CONNECT_TIMEOUT: int = int(os.getenv("DB_CONNECT_TIMEOUT", "5"))
+    DB_READ_TIMEOUT: int = int(os.getenv("DB_READ_TIMEOUT", "10"))
+    DB_WRITE_TIMEOUT: int = int(os.getenv("DB_WRITE_TIMEOUT", "10"))
+    OKX_HTTP_TIMEOUT: int = int(os.getenv("OKX_HTTP_TIMEOUT", "10"))
     MANAGER_HOST: str = os.getenv("MANAGER_HOST", "0.0.0.0")
     MANAGER_PORT: int = int(os.getenv("MANAGER_PORT", "6800"))
     HEALTH_CHECK_INTERVAL: int = int(os.getenv("HEALTH_CHECK_INTERVAL", "10"))

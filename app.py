@@ -1173,6 +1173,8 @@ def _okx_sdk_get_positions(api_key: str, secret_key: str, passphrase: str) -> di
     Получаем позиции через тот же OKXClient, что использует bot_manager,
     чтобы результат точно совпадал с тем, что видит бот.
     """
+    import socket
+
     import okx.Account as OkxAccount  # type: ignore
     from config import Config
 
@@ -1181,8 +1183,13 @@ def _okx_sdk_get_positions(api_key: str, secret_key: str, passphrase: str) -> di
     flag = "1" if demo else "0"
 
     # Минимальное использование python-okx SDK, чтобы не зависеть от bot_manager.trading.
-    client = OkxAccount.AccountAPI(api_key, secret_key, passphrase, False, flag)
-    r = client.get_positions(instType="SWAP")
+    previous_timeout = socket.getdefaulttimeout()
+    socket.setdefaulttimeout(Config.OKX_HTTP_TIMEOUT)
+    try:
+        client = OkxAccount.AccountAPI(api_key, secret_key, passphrase, False, flag)
+        r = client.get_positions(instType="SWAP")
+    finally:
+        socket.setdefaulttimeout(previous_timeout)
     # SDK возвращает dict с ключами code/data и т.п. — интерфейс совместим с тем,
     # как ожидает остальной код (см. bot_manager.okx_client).
     return r
