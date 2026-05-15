@@ -64,6 +64,7 @@ UPDATE_STATE_FULL = """
         connection_status   = %s,
         position_open       = %s,
         entry_spread_pct    = %s,
+        entry_time          = %s,
         dca_count_current   = %s,
         long_basket         = %s,
         short_basket        = %s,
@@ -78,6 +79,7 @@ SAVE_STATE_ON_SHUTDOWN = """
         reference_prices  = %s,
         positions_data    = %s,
         entry_spread_pct  = %s,
+        entry_time        = %s,
         dca_count_current = %s,
         position_open     = %s,
         long_basket       = %s,
@@ -143,4 +145,3 @@ UPSERT_HEARTBEAT = """
 SELECT_USER = """
     SELECT id, email, role, is_blocked FROM users WHERE id = %s
 """
-
