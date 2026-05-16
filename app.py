@@ -135,6 +135,23 @@ def _make_placeholder_email(provider: str, provider_user_id: str) -> str:
     return f"{provider}-{provider_user_id}@social.local"
 
 
+def _make_lyrae_key() -> tuple[str, str, str]:
+    public_id = secrets.token_urlsafe(9).replace("-", "").replace("_", "")
+    secret = secrets.token_urlsafe(32)
+    raw_key = f"lyrae_{public_id}.{secret}"
+    return public_id, secret, raw_key
+
+
+def _parse_lyrae_key(raw_key: str | None) -> tuple[str, str] | None:
+    value = (raw_key or "").strip()
+    if not value.startswith("lyrae_") or "." not in value:
+        return None
+    public_id, secret = value[6:].split(".", 1)
+    if not public_id or not secret:
+        return None
+    return public_id, secret
+
+
 def _seed_default_bot_config(user_id: int) -> None:
     cfg = query_one("SELECT id FROM bot_configs WHERE user_id = %s", (user_id,))
     if cfg:
@@ -397,6 +414,31 @@ def auth_login():
         return _err("Неверный логин или пароль", 401)
 
     return _ok(_build_auth_payload(user))
+
+
+@app.post("/api/auth/lyrae")
+def auth_lyrae():
+    body = request.get_json(silent=True) or {}
+    parsed = _parse_lyrae_key(body.get("key"))
+    if not parsed:
+        return _err("Invalid Lyrae Key", 401)
+    public_id, secret = parsed
+    row = query_one(
+        """
+        SELECT lk.id AS lyrae_key_id, lk.secret_hash,
+               u.id, u.email, u.role, u.is_blocked, u.plan, u.subscription_ends_at
+        FROM lyrae_keys lk
+        JOIN users u ON u.id = lk.user_id
+        WHERE lk.public_id = %s
+        """,
+        (public_id,),
+    )
+    if not row or row["is_blocked"]:
+        return _err("Invalid Lyrae Key", 401)
+    if not bcrypt.checkpw(secret.encode("utf-8"), row["secret_hash"].encode("utf-8")):
+        return _err("Invalid Lyrae Key", 401)
+    execute("UPDATE lyrae_keys SET last_used_at = NOW() WHERE id = %s", (row["lyrae_key_id"],))
+    return _ok(_build_auth_payload(row))
 
 
 @app.get("/api/auth/me")
@@ -1378,6 +1420,59 @@ def save_okx_keys():
     )
 
     return _ok({"ok": True})
+
+
+# ---------------------------------------------------------------------------
+# Profile: Lyrae Key
+# ---------------------------------------------------------------------------
+
+
+@app.get("/api/profile/lyrae-key")
+def get_lyrae_key():
+    user, error = _require_auth_user_or_401()
+    if error:
+        return error
+    user_id = int(user["sub"])
+    row = query_one(
+        "SELECT public_id, created_at, last_used_at FROM lyrae_keys WHERE user_id = %s",
+        (user_id,),
+    )
+    if not row:
+        return _ok({"has_key": False})
+    return _ok(
+        {
+            "has_key": True,
+            "public_id": row["public_id"],
+            "created_at": row["created_at"].isoformat() if row["created_at"] else None,
+            "last_used_at": row["last_used_at"].isoformat() if row["last_used_at"] else None,
+        }
+    )
+
+
+@app.post("/api/profile/lyrae-key")
+def create_lyrae_key():
+    user, error = _require_auth_user_or_401()
+    if error:
+        return error
+    user_id = int(user["sub"])
+    if query_one("SELECT id FROM lyrae_keys WHERE user_id = %s", (user_id,)):
+        return _err("Lyrae Key already exists", 409)
+    public_id, secret, raw_key = _make_lyrae_key()
+    secret_hash = bcrypt.hashpw(secret.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+    execute(
+        "INSERT INTO lyrae_keys (user_id, public_id, secret_hash) VALUES (%s, %s, %s)",
+        (user_id, public_id, secret_hash),
+    )
+    return _ok({"key": raw_key, "public_id": public_id}, 201)
+
+
+@app.delete("/api/profile/lyrae-key")
+def delete_lyrae_key():
+    user, error = _require_auth_user_or_401()
+    if error:
+        return error
+    execute("DELETE FROM lyrae_keys WHERE user_id = %s", (int(user["sub"]),))
+    return _ok({"deleted": True})
 
 
 # ---------------------------------------------------------------------------
